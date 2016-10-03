@@ -86,10 +86,11 @@ class ConvoyAnalysis_fsl_upd {
   }
 
   def updateVnext(Vnext: ListBuffer[Convoy], vnew: Convoy): ListBuffer[Convoy] = {
-    var added: Boolean = false;
+    var added: Boolean = false
     //println("Vnext call::")
     //println("new potential insertion::"+vnew.getUsers(),vnew.getLocations(),vnew.getStartTime(),vnew.endTime)
     //println("intial Vnext::")
+    //testing github
     //Vnext.foreach(t=> println("con:"+t.getUsers(),t.getLocations(),t.getStartTime(),t.endTime))
     Vnext.foreach { v: Convoy =>
       if(v.getUsers().equals(vnew.getUsers()) && v.hasSameUsers(vnew)==false)
@@ -249,6 +250,7 @@ class ConvoyAnalysis_fsl_upd {
     writeFile.close()
 
   }
+  //testing
 
   /** Remove conseuctive duplicates from the list */
   def compress[T](values: List[T]): List[T] =
