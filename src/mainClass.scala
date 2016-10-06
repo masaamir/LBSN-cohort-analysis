@@ -17,20 +17,7 @@ import LBSNAnalysis.DataSetFormatter
  */
 object mainClass {
 
-  def findDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double = {
-    val earthRadius = 6371000;
-    //meters
-    val dLat = Math.toRadians(lat2 - lat1);
-    val dLng = Math.toRadians(lon2 - lon1)
-    val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-        Math.sin(dLng / 2) * Math.sin(dLng / 2)
-    val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    val dist = (earthRadius * c)
 
-    return dist
-    //return math.sqrt(math.pow(lat1-lat2,2)+ math.pow(lon1-lon2,2) )
-  }
 
 
   def main(args: Array[String]) = {
@@ -402,23 +389,37 @@ object mainClass {
     //convoy.getConvoys(filePathCk_FS_Se_CA, filePathFF_FS_Se_CA,30, fileConvoys, "") // in minutes now
 
     /**Convoys patterns Analysis*/
-/*
-    //val convoyFile="E:\\DataSet\\old\\convoys\\FourSquare_old_23-7-2016\\fileConvoy_FSN.txt"
+
+    val convoyFile="C:\\Users\\MAamir\\Desktop\\Convoys\\FS.txt"
     //val convoyFile="E:\\DataSet\\old\\convoys\\FourSquarewithSemantics\\fileConvoy_FS_Seman_CA_1 hour.txt"
-    val convoyFile="E:\\DataSet\\old\\convoys\\wee\\fileConvoy_Wee_1hour.txt"
-    val convoyTableFile="E:\\DataSet\\old\\convoys\\FourSquarewithSemantics\\ConvoyTableWee.txt"
+    //val convoyFile="E:\\DataSet\\old\\convoys\\wee\\fileConvoy_Wee_1hour.txt"
+    val convoyTableFile="E:\\DataSet\\old\\convoys\\ConvoyTableWee.txt"
     val weeFriendsFile="E:\\DataSet\\New\\others\\weeplaces\\Modified\\friends.txt"
     val convoyPattern=new ConvoysPatternAnalysis
-    val weeConvoys=convoyPattern.readFile(convoyFile)
+    //val weeConvoys=convoyPattern.readFile(convoyFile)
     //val fr=new fileReaderLBSN
+    //val FSConvoys=convoyPattern.readConvoysFile(convoyFile)
 
     //val weeFriends=fr.readFriendsFile(weeFriendsFile)
 
-    convoyPattern.findConvoyStats(weeConvoys,weeFriendsFile)
-    convoyPattern.getPerGroup(convoyFile,filePathFF_FS_Se_CA,filePathVenues_FS_Se_CA,convoyTableFile)//filePathFF_FS_Se_CA
+    //convoyPattern.findConvoyStats(FSConvoys,filePathFF_FS_Se_CA)
+    //convoyPattern.getPerGroup(convoyFile,filePathFF_FS_Se_CA,filePathVenues_FS_Se_CA,convoyTableFile)//filePathFF_FS_Se_CA
 
-*/
 
+    //val venueWee="E:\\DataSet\\New\\others\\weeplaces\\weeplace_checkins.csv"
+    val df=new DataFormatter
+    //df.getVenuesWeeFromCheckinFile(venueWee)
+    val chk_We="E:\\DataSet\\New\\others\\weeplaces\\weeplace_checkins.csv"
+    val ff_We="E:\\DataSet\\New\\others\\weeplaces\\weeplace_friends.csv"
+    val venues_Wee="E:\\DataSet\\withSemantics\\NonClustered\\Dataset\\Venues\\Wee.txt"
+    val idToName_user_Wee="E:\\DataSet\\withSemantics\\NonClustered\\Dataset\\Mapping\\IdToName\\User\\Wee.txt"
+    val idToName_loc_Wee="E:\\DataSet\\withSemantics\\NonClustered\\Dataset\\Mapping\\IdToName\\Location\\Wee.txt"
+    val dsfn=new DataSetFormatterNew
+    //dsfn.formatWEEDataSetNew(ff_We,chk_We,venues_Wee,idToName_user_Wee,idToName_loc_Wee)
+
+
+
+    /*
     /**coordinates conversion*/
 /*
     val lat:Double=33.73762686110111
@@ -435,7 +436,7 @@ object mainClass {
     //val result=df.getCheckinsWithXY(fr.readCheckinFile(filePathCk_FS_Se_CA))
     //println("result size is::"+result.size)
 
-/*
+
     /**Stat Finder*/
     val fr=new fileReaderLBSN
     val checkins=fr.readCheckinFile(filePathCk_FS_Se_CA)
@@ -449,7 +450,10 @@ object mainClass {
     //dsf.clusterLocations(filePathCk_FS_Se_CA,clusteredFile)
 
 */
-    //val fr=new fileReaderLBSN
+
+
+
+    val fr=new fileReaderLBSN
     //fr.readVenuesFile(filePathVenues_FS_Se_CA)
 
     println("Converting original check-in files to clustered location checkin file")
@@ -466,7 +470,7 @@ object mainClass {
       println("File Name--------------::"+t.getName)
       gc.getClusters(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)//(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)
     }
-
+/*
     /** Clustered Data to Convoys*/
     println("**Finding Convoys**")
 
@@ -484,7 +488,7 @@ object mainClass {
 
     }
 
-
+*/
     println("** Used Memory:  " + (runtime.totalMemory - runtime.freeMemory) / mb)
     println("** Free Memory:  " + runtime.freeMemory / mb)
     println("** Total Memory: " + runtime.totalMemory / mb)

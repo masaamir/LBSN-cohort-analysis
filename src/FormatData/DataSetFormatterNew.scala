@@ -162,7 +162,6 @@ class DataSetFormatterNew {
 
 
   }
-
   def formatWEEDataSet(friendsFile: String, checkinFile: String, friendWrite: String, checkInWrite: String): Unit = {
     // assign a mapping to users and locations
     val fWriter = new PrintWriter(new File(friendWrite))
@@ -220,9 +219,7 @@ class DataSetFormatterNew {
       countCoords += 1
       coordIdMap += (((uc._1, uc._2) -> countCoords))
     }
-
     println("writing files")
-
     /** Write files */
     //friends
     println("friends size::" + friendsLines.size)
@@ -250,7 +247,133 @@ class DataSetFormatterNew {
       }
     }
     chkWriter.close()
+  }
 
+  def formatWEEDataSetNew(friendsFile: String, checkinFile: String, venuesFile:String,userIdToNameFile:String,locIdToNameFile:String): Unit = {
+    // assign a mapping to users and locations and write file for venues with detail UNLIKE function "formatWEEDataSet"
+    val venueWriter = new PrintWriter(new File(venuesFile))
+    val userIdToNameWriter=new PrintWriter(new File(userIdToNameFile))
+    val locIdToNameWriter=new PrintWriter(new File(locIdToNameFile))
+
+    //val fWriter = new PrintWriter(new File(friendWrite))
+    //val chkWriter = new PrintWriter(new File(checkInWrite))
+    //val chkLines=scala.io.Source.fromFile(checkinFile).getLines().toList.take(10).foreach(println)
+    /*.map(t=> t.split("\\|")).map(t=> (t(1).trim,t(5).trim.replace(' ','T')+"Z",t(3).trim,t(4).trim,"LocStr",t(2).trim)).toList//.take(10) //
+  chkLines.foreach{t=>
+    chkWriter.println(t._1+"\t"+t._2+"\t"+t._3+"\t"+t._4+"\t"+t._5+"\t"+t._6)
+  }*/
+    //To be converted Format= users \t time \t lat \t lon \t stringLoc \t LongLoc
+    /** Create unique ids for each user and map name to respective id */
+
+    var uniqueUsers: ListBuffer[String] = new ListBuffer[String]()
+    var usersIdMap: scala.collection.mutable.Map[String, Long] = scala.collection.mutable.Map[String, Long]()
+    val friendsLines = scala.io.Source.fromFile(friendsFile).getLines().drop(1).map(t => t.split(",")).toList //.take(10).foreach(println)
+    friendsLines.foreach { t =>
+      uniqueUsers += t(0)
+      uniqueUsers += t(1)
+    }
+
+    println("users: total, unique::" + uniqueUsers.size, uniqueUsers.distinct.size)
+    uniqueUsers = uniqueUsers.distinct
+    var countUser: Long = 0
+    uniqueUsers.foreach { uu =>
+      countUser += 1
+      usersIdMap += (uu -> countUser)
+    }
+
+    usersIdMap.toList.foreach{u=>
+      userIdToNameWriter.println(u._2+"\t"+u._1)
+    }
+    userIdToNameWriter.close()
+    //usersIdMap.foreach(t=> println(t))
+    /** Create unique ids for each location and map location name to respective id */
+    var uniqueLocs: ListBuffer[String] = new ListBuffer[String]()
+    var uniqueCoords: ListBuffer[(String, String)] = new ListBuffer[(String, String)]()
+    var locIdMap: scala.collection.mutable.Map[String, Long] = scala.collection.mutable.Map[String, Long]()
+    var coordIdMap: scala.collection.mutable.Map[(String, String), Long] = scala.collection.mutable.Map[(String, String), Long]()
+    // Actual is userid,placeid,datetime,lat,lon,city,category
+    val chkLines = scala.io.Source.fromFile(checkinFile).getLines().drop(1).map(t => t.split(",")).toList //.take(100)//.map(t=> (t(1)))//.take(10).foreach(println)
+    chkLines.foreach { t =>
+      if (t.size > 2) {
+        uniqueLocs += t(1)
+        uniqueCoords += ((t(3), t(4)))
+      }
+      else {
+        println("anomaly in data set::" + t.mkString(","))
+      }
+    }
+    println("locs: total, unique::" + uniqueLocs.size, uniqueLocs.distinct.size)
+    println("coords: total, unique::" + uniqueCoords.size, uniqueCoords.distinct.size)
+    uniqueLocs = uniqueLocs.distinct
+    uniqueCoords = uniqueCoords.distinct
+    var countLocs: Long = 0
+    uniqueLocs.foreach { ul =>
+      countLocs += 1
+      locIdMap += (ul -> countLocs)
+    }
+    locIdMap.toList.foreach{t=>
+      locIdToNameWriter.println(t._2+"\t"+t._1)
+    }
+    locIdToNameWriter.close()
+    var countCoords: Long = 0
+    uniqueCoords.foreach { uc =>
+      countCoords += 1
+      coordIdMap += (((uc._1, uc._2) -> countCoords))
+    }
+    println("writing files")
+    /** Write files */
+
+    //friends
+    /*
+    println("friends size::" + friendsLines.size)
+    friendsLines.foreach { fp =>
+      val firstUser = usersIdMap.getOrElse(fp(0), null)
+      val secondUser = usersIdMap.getOrElse(fp(1), null)
+      if (firstUser == null || secondUser == null) {
+        println("did something wrong for users!!")
+      } else {
+        fWriter.println(firstUser + "\t" + secondUser)
+      }
+    }
+    fWriter.close()
+*/
+    //location
+    val locationList=new ListBuffer[Location]()
+    chkLines.foreach { ck =>
+      //println("actual::"+ck.mkString(","))
+      //val user = usersIdMap.getOrElse(ck(0), null)
+      val loc:Long = locIdMap.getOrElse(ck(1), -1)
+      val cord = coordIdMap.getOrElse((ck(3), ck(4)), null)
+      var city=""
+      var category=""
+      if ( loc == -1 || cord == null) {
+        println("string,loc, coord" + ck.mkString("::"),  loc, cord)
+        println("did something wrong for checkins")
+      } else {
+        if(ck.size==7){
+          category=ck(6)
+          city=ck(5)
+        }else if (ck.size ==6){
+          category="n\\a"
+          city=ck(5)
+        }else if(ck.size==5){
+          category="n\\a"
+          city="n\\a"
+        }
+        //if(ck.size==6) category="n\\a"
+        //else if(ck.size==7) category=ck(6)
+        //else if(ck.size==5 && ck(5)=="") city="n\\a" else city=ck(5)
+        //if(ck.size==4) city==
+
+        //locationList += new Location(loc,ck(3).toDouble,ck(4).toDouble,"",city,"",ListBuffer(category))////
+        venueWriter.println(loc+"\t"+ck(3).toDouble+"\t"+ck(4).toDouble+"\t"+"n\\a"+"\t"+city+"\t"+"n\\a"+"\t"+category)
+        //println(loc,ck(3).toDouble,ck(4).toDouble,"",city,"",ListBuffer(category))
+
+        //chkWriter.println( "\t" + ck(2) + "Z" + "\t" + ck(3) + "\t" + ck(4) + "\t" + cord + "\t" + loc)
+      }
+    }
+    venueWriter.close()
+    //chkWriter.close()
   }
 
 }

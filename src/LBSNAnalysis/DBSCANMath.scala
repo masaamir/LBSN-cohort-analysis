@@ -36,7 +36,7 @@ class DBSCANMath {
 
 
     // create map
-    val GPSToXYZMap: scala.collection.mutable.Map[(Double, Double, Double), (Double, Double)] = scala.collection.mutable.Map[(Double, Double, Double), (Double, Double)]()
+    val GPSToXYZMap = scala.collection.mutable.Map[(Double, Double, Double), (Double, Double)]()
     for (i <- 0 until coords.size) {
       GPSToXYZMap += ((xyzCoords(i) -> coords(i)))
     }
@@ -65,9 +65,9 @@ class DBSCANMath {
     val xyzArray = xyzCoords.map(t => dList += new DoubleArray(Array(t._1, t._2, t._3))) //Array(t._1,t._2,t._3)
     println("dlist size ::" + dList.size)
     //dList.foreach(t=> println("class is::"+t.getClass))
-    val clusters = indDBSCAN.runAlgorithmOnArray(minClusterSize, eps, dList.asJava)
+    //val clusters = indDBSCAN.runAlgorithmOnArray(minClusterSize, eps, dList.asJava)
 
-    //val clusters=dbscanmath.cluster(ds.asJavaCollection)
+    val clusters=dbscanmath.cluster(ds.asJavaCollection)
     println("results size is ::" + clusters.size)
     /*var clusterCount=0
     for(i<-0 until clusters.size()){

@@ -34,6 +34,13 @@ class ConvoysPatternAnalysis {
     return convoys
   }
 
+  def readConvoysFile(convoysFile:String): ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] ={
+    val convoys = scala.io.Source.fromFile(convoysFile).getLines().to[ListBuffer]
+      .map(t=> t.split("\t")).map(t=> (t(0).split(","),t(1).split(","),t(2).split(",")))
+      .map(t=> (t._1.map(it=> it.trim.toLong).to[ListBuffer],t._2.map(it=> it.trim.toLong).to[ListBuffer],t._3.map(it=> it.trim.toLong).to[ListBuffer]))
+
+    return convoys
+  }
   /** Find the cliques in a set by giving all the maximal cliques in the graph */
   def getCliquesOfSubset(items: ListBuffer[Long], maximalCliques: ListBuffer[Set[Long]]): ListBuffer[Set[Long]] = {
 
@@ -171,6 +178,18 @@ class ConvoysPatternAnalysis {
     val locsCount = convoys.groupBy(t => t._2).map(t => (t._1, t._2.size)).toList.sortBy(t => -t._2)
     locsCount.take(10).foreach(t => println(t))
 
+    val convoyUserGroup=List[Long](3,4,5)
+    convoyUserGroup.foreach{t=>
+      val count=convoys.filter(it=> it._1.size>=t).size
+      println("Convoys users greater than :"+t+" are::"+count)
+    }
+    val convoyLocGroup=List[Long](3,4,5)
+    convoyLocGroup.foreach{t=>
+      val count=convoys.filter(it=> it._2.size>=t).size
+      println("Convoys locations greater than :"+t+" are::"+count)
+    }
+
+
     // total users participate in convoys
     var convoyUsers: ListBuffer[Long] = new ListBuffer[Long]()
     convoys.foreach { c =>
@@ -201,6 +220,7 @@ class ConvoysPatternAnalysis {
     /** Clique convoys */
     val convoysWithCliques = getConvoyWithCliques(convoys, friendsFile)
     println("filtered convoy size::" + convoysWithCliques.size)
+
 
   }
 

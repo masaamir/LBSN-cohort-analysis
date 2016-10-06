@@ -20,7 +20,7 @@ class fileReaderLBSN {
   }
 
   def readVenuesFile(checkinFile: String): ListBuffer[Location] = {
-    // for foursquare dataset with semantics for CA
+    // for foursquare data-set with semantics for CA
     var cat:ListBuffer[String]=new ListBuffer()
     val venues = scala.io.Source.fromFile(checkinFile).getLines().toList
       .map(t => t.split("\t"))

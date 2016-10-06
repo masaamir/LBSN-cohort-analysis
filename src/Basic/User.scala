@@ -16,6 +16,4 @@ class User(id:Long,name:String,address:String) {
   def getUId(): Long ={
     return  uid
   }
-
-
 }

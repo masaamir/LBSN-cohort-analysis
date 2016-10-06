@@ -64,6 +64,14 @@ class DataFormatter {
     return GPSToXYZMap
   }
 
+  def getVenuesWeeFromCheckinFile(inCheckinFile:String): Unit ={
+
+    val checkins = scala.io.Source.fromFile(inCheckinFile).getLines().take(100)
+    checkins.foreach(t=> println(t))
+
+
+  }
+
   def getUsersFromFriends(friends: List[(Long, Long)]): ListBuffer[Long] = {
     var totalUsers: ListBuffer[Long] = new ListBuffer[Long]()
     friends.map { t =>
