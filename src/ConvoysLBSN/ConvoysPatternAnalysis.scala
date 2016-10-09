@@ -66,26 +66,34 @@ class ConvoysPatternAnalysis {
 
   }
 
+
   /** Get cliques for each user group in convoys */
   def getConvoyWithCliques(filterdConvoy: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])],
-                           friendsFilePath: String): ListBuffer[(List[Long], ListBuffer[Long], ListBuffer[Long])] = {
+                           friendsFilePath: String): ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = {
     val friendslines = scala.io.Source.fromFile(friendsFilePath).getLines().map(t => t.split("\t"))
       .map(t => (t(0).toLong, t(1).toLong)).toList.distinct //Get friends
-    val friends = friendslines.groupBy(t => t._1) //Get each user's friends
+    //val friends = friendslines.groupBy(t => t._1) //Get each user's friends
     var users: ListBuffer[Long] = new ListBuffer[Long]()
     filterdConvoy.foreach { fc =>
       users ++= fc._1 // Get Vertices: All the users that are involved in convoys called convoyUsers
     }
     users = users.distinct // Filter only unique visitors
-    val edges: ListBuffer[(Long, Long)] = new ListBuffer[(Long, Long)]()
-    users.foreach { t =>
+    val usersMap=users.map(t=> (t,1)).toMap
+
+    var edges: ListBuffer[(Long, Long)] = new ListBuffer[(Long, Long)]()
+    /*users.foreach { t =>
       var uf = friends.getOrElse(t, null)
       if (uf != null)
         uf = uf.filter(it => users.contains(it._2)) // only consider those friends that are in convoyUsers
       if (uf != null) {
         edges ++= uf
       }
-    }
+    }*/
+    //alternate for finding edges
+
+    edges=friendslines.filter{t=>
+      usersMap.contains(t._1) && usersMap.contains(t._2)
+    }.to[ListBuffer]
     val graph: SimpleGraph[Long, DefaultEdge] = new SimpleGraph[Long, DefaultEdge](classOf[DefaultEdge])
     users.foreach(t => graph.addVertex(t)) //add vertices
     edges.foreach(t => graph.addEdge(t._1, t._2)) //add edges
@@ -97,15 +105,15 @@ class ConvoysPatternAnalysis {
     cliques.foreach { t =>
       scalaCliques += t.toSet //convert from java to scala collection
     }
-    val filteredCliqueConvoys: ListBuffer[(List[Long], ListBuffer[Long], ListBuffer[Long])] = new
-        ListBuffer[(List[Long], ListBuffer[Long], ListBuffer[Long])]()
+    val filteredCliqueConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = new
+        ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])]()
     filterdConvoy.foreach { fc =>
       val cliqueGroups = getCliquesOfSubset(fc._1, scalaCliques) //get cliques in a particular user group in a convoy
       cliqueGroups.foreach { t =>
-        filteredCliqueConvoys += ((t.toList, fc._2, fc._3)) // add in main clique convoy list
+        filteredCliqueConvoys += ((t.toList.to[ListBuffer], fc._2, fc._3)) // add in main clique convoy list
       }
     }
-    return filteredCliqueConvoys
+    return filteredCliqueConvoys.distinct
   }
 
   def getConnectedComponents(vertices: ListBuffer[Long], minConvoyUsers: Long): ListBuffer[Set[Long]] = {
@@ -166,10 +174,11 @@ class ConvoysPatternAnalysis {
         filteredCCConvoys += ((t.toList, fc._2, fc._3)) // add in main clique convoy list
       }
     }
+
     return filteredCCConvoys
   }
 
-
+ var convoyCount=0
   def findConvoyStats(convoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])], friendsFile: String): Unit = {
     println("Users groups convoys with their corresponding locations")
     val groupsCount = convoys.groupBy(t => t._1).map(t => (t._1, t._2.size)).toList.sortBy(t => -t._2)
@@ -205,13 +214,10 @@ class ConvoysPatternAnalysis {
     }
     println("convoys locations::" + convoyLocs.distinct.size)
     println("locations::" + convoyLocs.distinct)
-
-
     // users size
     println("group size")
     val groupSize = convoys.map(t => (t._1, t._2, t._1.size)).sortBy(t => -t._3).take(10)
     groupSize.foreach(t => println(t))
-
     println("locations size")
     // locations size
     val locSize = convoys.map(t => (t._1, t._2, t._2.size)).sortBy(t => -t._3).take(10)
@@ -221,9 +227,85 @@ class ConvoysPatternAnalysis {
     val convoysWithCliques = getConvoyWithCliques(convoys, friendsFile)
     println("filtered convoy size::" + convoysWithCliques.size)
 
+    if(convoyCount==0){
+      convoyCount += 1
+      println("Now stats of cliques convoys::")
+      findConvoyStats(convoysWithCliques,friendsFile)
+
+    }
 
   }
 
+  def getConvoyTable(convoysFile: String, friendsFile: String, venuesFile: String, fileConvoyTable:String): Unit = {
+
+    val writerConvoyTable=new PrintWriter(new File(fileConvoyTable))
+    var convoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = readConvoysFile(convoysFile)
+    //convoys.foreach(t=> println(t))
+    convoys = convoys.map(t => (t._1.sortBy(t => t), t._2.sortBy(t => t), t._3))
+
+    //findConvoyStats(convoys)
+    val fr = new fileReaderLBSN
+    val friends = fr.readFriendsFile(friendsFile)
+    val locations = fr.readVenuesFileWee(venuesFile)
+    val locationMap = locations.map(t => (t.lId, t)).toMap
+    /** Convoys */
+    var convoysTable: ListBuffer[(Long, Long, Long, String, ListBuffer[Long], ListBuffer[Long],ListBuffer[String])] = new ListBuffer()
+    //convoyId, userId, locationId,category, User group, location group
+    var convoyId: Long = -1
+    convoys.foreach { t =>
+      convoyId += 1
+      t._1.foreach { u => //user
+        t._2.foreach { l => //location
+          val loc: Location = locationMap.getOrElse(l, null)
+          if (loc != null) {
+            if (loc.lCategories.size > 0) {
+              loc.lCategories.foreach { cat =>
+                convoysTable +=((convoyId, u, l,cat, t._1,t._2,loc.lCategories))
+              }
+            }
+            /*else {
+              println("else printed"+loc.printInfo())
+              convoysTable +=((convoyId, u, l, "", t._1,t._2,ListBuffer()))
+            }*/
+          }
+        }
+      }
+    }
+    convoysTable.groupBy(t=> t._2).map(t=> (t._1,t._2.map(it=> it._1).distinct)).toList
+      .sortBy(t=> -t._2.size).map(t=> (t._1, t._2.size, t._2)).take(10)
+    //.foreach(println)
+    /*val user=3943
+    var fTravelCompanions:ListBuffer[Long]=new ListBuffer()
+    var temp:ListBuffer[ListBuffer[Long]]=new ListBuffer()
+    convoysTable=convoysTable.filter(t=> t._2==user)
+    //println("convoy size::"+convoysTable.size)
+    convoysTable.map(t=> (t._1,t._5,t._6,t._4)).distinct.groupBy(t=> t._4)
+      .map{t=>
+      temp=t._2.map(it=> it._2)
+      temp.foreach{tem=>
+        fTravelCompanions ++= tem
+      }
+      (t._1,temp)}
+    //.foreach(println)
+    fTravelCompanions= fTravelCompanions.distinct -= user
+    println("travel companion: size, users ::"+fTravelCompanions.size, fTravelCompanions)
+    var fUser:ListBuffer[Long]=new ListBuffer()
+    friends.filter(t=> t._1==user || t._2==user).foreach{t=>
+      fUser += t._1
+      fUser += t._2
+    }
+    fUser=fUser.distinct -= user
+    println("friends of users: size, friends::"+fUser.size,fUser)
+    */
+    writerConvoyTable.println("convoyId"+"\t"+"user"+"\t"+"location"+"\t"+"category"+"\t"+"UGroupSize"+"\t"+"LGroupSize"+"\t"+"Category Group Size"+"\t"+"UGroup"+"\t"+"LGroup"+"\t"+"Categories")
+    convoysTable.foreach{t=>
+      writerConvoyTable.println(t._1+"\t"+t._2+"\t"+t._3+"\t"+t._4+"\t"+t._5.size+"\t"+t._6.size+"\t"+t._7.size+"\t"+t._5.mkString(",")+"\t"+t._6.mkString(",")+"\t"+t._7.mkString(","))
+    }
+    writerConvoyTable.close()
+    /** Clique convoys */
+    //val convoysWithCC = getConvoyWithConnectedComponents(convoys, friendsFile,1)
+    //println("filtered convoy size::" + convoysWithCC.size)
+  }
   def getPerGroup(convoysFile: String, friendsFile: String, venuesFile: String, fileConvoyTable:String): Unit = {
 
     val writerConvoyTable=new PrintWriter(new File(fileConvoyTable))

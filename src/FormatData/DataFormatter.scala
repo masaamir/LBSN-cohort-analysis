@@ -108,13 +108,10 @@ class DataFormatter {
     val xyzLines = scala.io.Source.fromFile(clusterFile).getLines().toList
       .map(t => t.split("\t")).map(t => ((t(1).toDouble, t(2).toDouble, t(3).toDouble), t(0).toLong))
     val xyzToIdMap = xyzLines.toMap
-
     var missingPointsId = checkins.size
     var missingPointsCount = 0
-
     val modifiedCheckins = checkins.map { t =>
       val xyz: (Double, Double, Double) = gpsToXyzMap.getOrElse((t._3, t._4), null)
-
       if (xyz == null) println("error in conversion from gps to XYZ")
       var id: Long = xyzToIdMap.getOrElse((xyz._1, xyz._2, xyz._3), -1L)
       if (id == -1L) {

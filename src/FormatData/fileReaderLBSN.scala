@@ -19,10 +19,33 @@ class fileReaderLBSN {
     return checkins //{(user,Date,lat,lon,locStr,LocLong,dateStringActual)}
   }
 
-  def readVenuesFile(checkinFile: String): ListBuffer[Location] = {
+  def readVenuesFileWee(venuesFile:String): ListBuffer[Location] ={
+    println("in read venues file")
+    val cat:ListBuffer[String]=new ListBuffer()
+    val city=""
+    var count=0
+    val venues=scala.io.Source.fromFile(venuesFile).getLines().to[ListBuffer]
+    println("original venue size"+venues.size)
+    val newVenues:ListBuffer[Location]=venues.map(t=> t.split("\t")).filter(t=> t.size==7)
+      .map{t=>
+      count += 1
+      if(count%10000==0)println("count::"+count)
+
+      //println(t.mkString(","))
+      //println("size is ::"+t.size)
+        //println(t(0).toLong, t(1).toDouble, t(2).toDouble, t(3), t(4), t(5), t(6).split(":").to[ListBuffer])
+      val cat:ListBuffer[String]=t(6).split(":").to[ListBuffer]
+      (new Location(t(0).toLong, t(1).toDouble, t(2).toDouble, t(3), t(4), t(5), cat))
+    }
+    println(" after venues size::"+venues.size)
+
+return newVenues
+  }
+
+  def readVenuesFile(venuesFile: String): ListBuffer[Location] = {
     // for foursquare data-set with semantics for CA
     var cat:ListBuffer[String]=new ListBuffer()
-    val venues = scala.io.Source.fromFile(checkinFile).getLines().toList
+    val venues = scala.io.Source.fromFile(venuesFile).getLines().toList
       .map(t => t.split("\t"))
       .map { t =>
       if (t.size == 7) cat = t(6).split(",").to[ListBuffer] else cat = ListBuffer()

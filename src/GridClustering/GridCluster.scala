@@ -50,10 +50,31 @@ class GridCluster {
   }
 
 
-  def getClusters(fileCheckin:String,inGridX:Double,inGridY:Double,fileNewCheckins:String): Unit ={
+  def evaluateClustering(fileGridToLoc:String,fileNCCheckins:String): Unit ={
+    val gridToLoc=scala.io.Source.fromFile(fileGridToLoc).getLines().toList.map(t=> t.split("\t"))
+      .map(t=> (t(0),t(1).split(","))).map(t=> (t._1.toLong,t._2.map(it=> it.toLong).toList))
+    val fr=new fileReaderLBSN
+
+    val locToCoords=fr.readCheckinFile(fileNCCheckins).map(t=>(t._6,(t._3,t._4))).distinct.toMap
+
+    val gridWithLocCoord=gridToLoc.map{t=>
+      (t._1,t._2.map{it=>
+        (it,locToCoords.getOrElse(it,(-1.0,-1.0)))
+      })
+    }
+    gridWithLocCoord.sortBy(t=> -t._2.size).take(10).foreach{t=>
+      println("For grid Id::"+t._1)
+      println("Common locations wit size::"+t._2.size+" are::")
+      t._2.foreach(it=> println(it._2._1+","+it._2._2))
+    }
+
+  }
+
+  def getClusters(fileCheckin:String,inGridX:Double,inGridY:Double,fileNewCheckins:String, fileMapGridToLoc:String): Unit ={
     val df=new DataFormatter
     val fr=new fileReaderLBSN
     val fw=new PrintWriter((new File(fileNewCheckins)))
+    val mapGridToLocWriter=new PrintWriter(new File(fileMapGridToLoc))
 
     val checkins=fr.readCheckinFile(fileCheckin)
     println("actual checkins::"+checkins.size)
@@ -103,6 +124,12 @@ class GridCluster {
    //println("List::")
     //newLocs.filter(t=> t._1==10).foreach(println)
     //println("clustered Loc Map::"+clustLocsMaps.getOrElse(10,null))
+    /**Write file to map Grid ids to corresponding location ids*/
+    clustLocsMaps.toList.groupBy(t=> t._2).foreach{t=>
+      mapGridToLocWriter.println(t._1+"\t"+t._2.map(it=> it._1).mkString(","))
+    }
+    mapGridToLocWriter.close()
+
 
     /** Write new check-ins with new locationId */
     var newCheckinsCount= 0
