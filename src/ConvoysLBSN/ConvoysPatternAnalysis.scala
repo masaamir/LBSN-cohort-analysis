@@ -17,7 +17,7 @@ import scala.collection.mutable.ListBuffer
  * Created by MAamir on 9/23/2016.
  */
 class ConvoysPatternAnalysis {
-  //github test
+  //github test new
   var filteredFriends: Map[Long, List[(Long, Long)]] = Map()
 
   def readFile(convoysFile: String): ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = {
