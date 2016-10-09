@@ -17,6 +17,7 @@ import scala.collection.mutable.ListBuffer
  * Created by MAamir on 9/23/2016.
  */
 class ConvoysPatternAnalysis {
+  //github test
   var filteredFriends: Map[Long, List[(Long, Long)]] = Map()
 
   def readFile(convoysFile: String): ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = {
@@ -270,7 +271,7 @@ class ConvoysPatternAnalysis {
           }
         }
       }
-    }
+    }// test
     convoysTable.groupBy(t=> t._2).map(t=> (t._1,t._2.map(it=> it._1).distinct)).toList
       .sortBy(t=> -t._2.size).map(t=> (t._1, t._2.size, t._2)).take(10)
     //.foreach(println)

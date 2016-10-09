@@ -8,7 +8,7 @@ import Basic.Location
 import ConvoysLBSN._
 import CoordinateConversion.{Angle, UTMCoord}
 import DataStatistics.StatFinder
-import FormatData.{DataFormatter, fileReaderLBSN, DataSetFormatterNew}
+import FormatData.{DataFilter, DataFormatter, fileReaderLBSN, DataSetFormatterNew}
 import GridClustering.GridCluster
 import LBSNAnalysis.DataSetFormatter
 
@@ -384,26 +384,28 @@ object mainClass {
     /** Convoys */
     val mb = 1024*1024
     val runtime = Runtime.getRuntime
+    val fr=new fileReaderLBSN
     //val convoy = new ConvoyAnalysis_fsl_upd
     //val fileConvoys="E:\\DataSet\\old\\LBSNAnalysis\\Convoy\\newConvoys_FS_Semantic.txt"
     //convoy.getConvoys(filePathCk_FS_Se_CA, filePathFF_FS_Se_CA,30, fileConvoys, "") // in minutes now
 
     /**Convoys patterns Analysis*/
 
-    val convoyFile="C:\\Users\\MAamir\\Desktop\\Convoys\\FS.txt"
+    val convoyFileFS="C:\\Users\\MAamir\\Desktop\\Convoys\\FS.txt"
     //val convoyFile="E:\\DataSet\\old\\convoys\\FourSquarewithSemantics\\fileConvoy_FS_Seman_CA_1 hour.txt"
     //val convoyFile="E:\\DataSet\\old\\convoys\\wee\\fileConvoy_Wee_1hour.txt"
-    val convoyTableFile="E:\\DataSet\\old\\convoys\\ConvoyTableWee.txt"
+    val weeConvoyTableFile="E:\\DataSet\\old\\convoys\\ConvoyTableWee.txt"
     val weeFriendsFile="E:\\DataSet\\New\\others\\weeplaces\\Modified\\friends.txt"
+    val weeConvoys="E:\\DataSet\\withSemantics\\Clustered\\Convoys\\Wee.txt"
+    val weeVenues="E:\\DataSet\\withSemantics\\NonClustered\\Dataset\\Venues\\Wee.txt"
     val convoyPattern=new ConvoysPatternAnalysis
     //val weeConvoys=convoyPattern.readFile(convoyFile)
     //val fr=new fileReaderLBSN
-    //val FSConvoys=convoyPattern.readConvoysFile(convoyFile)
-
+    //val Convoys=convoyPattern.readConvoysFile(weeConvoys)
     //val weeFriends=fr.readFriendsFile(weeFriendsFile)
-
-    //convoyPattern.findConvoyStats(FSConvoys,filePathFF_FS_Se_CA)
-    //convoyPattern.getPerGroup(convoyFile,filePathFF_FS_Se_CA,filePathVenues_FS_Se_CA,convoyTableFile)//filePathFF_FS_Se_CA
+    //convoyPattern.findConvoyStats(Convoys,weeFriendsFile)
+    convoyPattern.getConvoyTable(weeConvoys,weeFriendsFile,weeVenues,weeConvoyTableFile)//filePathFF_FS_Se_CA
+    //fr.readVenuesFileWee(weeVenues)
 
 
     //val venueWee="E:\\DataSet\\New\\others\\weeplaces\\weeplace_checkins.csv"
@@ -453,24 +455,29 @@ object mainClass {
 
 
 
-    val fr=new fileReaderLBSN
+
     //fr.readVenuesFile(filePathVenues_FS_Se_CA)
 
-    println("Converting original check-in files to clustered location checkin file")
+    //println("Converting original check-in files to clustered location checkin file")
     /**Original data to Clustered Data*/
+
     val dirCheckinsNC="E:\\DataSet\\withSemantics\\NonClustered\\Dataset\\Checkins" // checkin directory non-clustered
     val dirCheckinsC="E:\\DataSet\\withSemantics\\Clustered\\Dataset\\Checkins"
+    val dirMapGridIdToLocIds="E:\\DataSet\\withSemantics\\Clustered\\Dataset\\Mappings\\GridIdToLocId"
+    val fileName="SmallFile.txt"
     val gridX=10
     val gridY=10
     val filesCheckins=new java.io.File(dirCheckinsNC).listFiles
-    filesCheckins.take(1).foreach{t=>
+    /*filesCheckins.take(1).foreach{t=>
       val gc=new GridCluster
       //val fileName=t.getName
       val fileName="SmallFile.txt"
+      val fileMapGridToLoc=fileName
       println("File Name--------------::"+t.getName)
-      gc.getClusters(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)//(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)
-    }
-/*
+      gc.getClusters(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName,dirMapGridIdToLocIds+"\\"+fileName)//(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)
+
+    }*/
+    /*
     /** Clustered Data to Convoys*/
     println("**Finding Convoys**")
 
@@ -489,6 +496,21 @@ object mainClass {
     }
 
 */
+    //val gc=new GridCluster
+    //gc.evaluateClustering(dirMapGridIdToLocIds+"\\"+fileName,dirCheckinsNC+"\\"+fileName)
+
+
+    /**Filtering check-ins having locations with categories*/
+    /*
+    val GWC="E:\\DataSet\\withSemantics\\NonClustered\\Dataset\\Checkins\\GW_New.txt"
+    val GWSpots1="E:\\DataSet\\New\\others\\gowalla\\gowalla_spots_subset1.csv"
+    val GWSpots2="E:\\DataSet\\New\\others\\gowalla\\gowalla_spots_subset2.csv"
+    val dFi=new DataFilter
+    dFi.filterGWOnCategorySpots(GWC,GWSpots2 )
+    */
+
+
+
     println("** Used Memory:  " + (runtime.totalMemory - runtime.freeMemory) / mb)
     println("** Free Memory:  " + runtime.freeMemory / mb)
     println("** Total Memory: " + runtime.totalMemory / mb)
