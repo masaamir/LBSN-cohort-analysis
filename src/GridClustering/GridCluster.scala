@@ -98,7 +98,7 @@ class GridCluster {
       }
 
       CVenuesWriter.println(t._1+"\t"+lLat/mappedLocs.size.toDouble+"\t"+lLon/mappedLocs.size.toDouble
-        +"\t"+lArea+"\t"+lState+"\t"+lCountry+"\t"+lCategories.mkString(","))
+        +"\t"+lArea+"\t"+lState+"\t"+lCountry+"\t"+lCategories.distinct.mkString(","))
       //CVenues += new Location((t._1.toLong,lLat.toDouble,lLon.toDouble,lArea.toString,lCountry.toString,lCategories))
     }
     CVenuesWriter.close()

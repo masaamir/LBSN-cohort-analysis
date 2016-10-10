@@ -241,18 +241,18 @@ class ConvoysPatternAnalysis {
 
     val writerConvoyTable=new PrintWriter(new File(fileConvoyTable))
     var convoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = readConvoysFile(convoysFile)
-    //convoys.foreach(t=> println(t))
-    convoys = convoys.map(t => (t._1.sortBy(t => t), t._2.sortBy(t => t), t._3))
+    convoys = convoys.map(t => (t._1.sortBy(t => t), t._2.sortBy(t => t), t._3)) // sorted users, locations and TS in convoys
 
     //findConvoyStats(convoys)
     val fr = new fileReaderLBSN
     val friends = fr.readFriendsFile(friendsFile)
     val locations = fr.readVenuesFileWee(venuesFile)
-    println("locations size::"+locations.size)
+    println("Venues with categories size::"+locations.size)
     val locationMap = locations.map(t => (t.lId, t)).toMap
     /** Convoys */
-    var convoysTable: ListBuffer[(Long, Long, Long, String, ListBuffer[Long], ListBuffer[Long],ListBuffer[String])] = new ListBuffer()
-    //convoyId, userId, locationId,category, User group, location group
+    var convoysTable: ListBuffer[(Long, Long, Long, String, ListBuffer[Long], ListBuffer[Long],ListBuffer[String])]
+    = new ListBuffer()
+    //convoyId, userId, locationId,category, User group, location group, Category group
     var convoyId: Long = -1
     convoys.foreach { t =>
       convoyId += 1
@@ -272,7 +272,7 @@ class ConvoysPatternAnalysis {
           }
         }
       }
-    }// test
+    }
     //convoysTable.groupBy(t=> t._2).map(t=> (t._1,t._2.map(it=> it._1).distinct)).toList
       //.sortBy(t=> -t._2.size).map(t=> (t._1, t._2.size, t._2)).take(10)
     //.foreach(println)
