@@ -26,18 +26,18 @@ class fileReaderLBSN {
     var count=0
     val venues=scala.io.Source.fromFile(venuesFile).getLines().to[ListBuffer]
     println("original venue size"+venues.size)
+    //venues.map(t=> t.split("\t")).take(10).foreach(t=> println(t.mkString(",")))
     val newVenues:ListBuffer[Location]=venues.map(t=> t.split("\t")).filter(t=> t.size==7)
       .map{t=>
       count += 1
-      if(count%10000==0)println("count::"+count)
-
-      //println(t.mkString(","))
-      //println("size is ::"+t.size)
-        //println(t(0).toLong, t(1).toDouble, t(2).toDouble, t(3), t(4), t(5), t(6).split(":").to[ListBuffer])
-      val cat:ListBuffer[String]=t(6).split(":").to[ListBuffer]
+      val partialCat:ListBuffer[String]=t(6).split(":").to[ListBuffer]
+        val cat:ListBuffer[String]=new ListBuffer()
+        partialCat.foreach{pc=>
+          cat ++= pc.split(",").to[ListBuffer]
+        }
       (new Location(t(0).toLong, t(1).toDouble, t(2).toDouble, t(3), t(4), t(5), cat))
     }
-    println(" after venues size::"+venues.size)
+    println(" after venues size::"+newVenues.size)
 
 return newVenues
   }

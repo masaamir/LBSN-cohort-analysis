@@ -248,6 +248,7 @@ class ConvoysPatternAnalysis {
     val fr = new fileReaderLBSN
     val friends = fr.readFriendsFile(friendsFile)
     val locations = fr.readVenuesFileWee(venuesFile)
+    println("locations size::"+locations.size)
     val locationMap = locations.map(t => (t.lId, t)).toMap
     /** Convoys */
     var convoysTable: ListBuffer[(Long, Long, Long, String, ListBuffer[Long], ListBuffer[Long],ListBuffer[String])] = new ListBuffer()
@@ -272,8 +273,8 @@ class ConvoysPatternAnalysis {
         }
       }
     }// test
-    convoysTable.groupBy(t=> t._2).map(t=> (t._1,t._2.map(it=> it._1).distinct)).toList
-      .sortBy(t=> -t._2.size).map(t=> (t._1, t._2.size, t._2)).take(10)
+    //convoysTable.groupBy(t=> t._2).map(t=> (t._1,t._2.map(it=> it._1).distinct)).toList
+      //.sortBy(t=> -t._2.size).map(t=> (t._1, t._2.size, t._2)).take(10)
     //.foreach(println)
     /*val user=3943
     var fTravelCompanions:ListBuffer[Long]=new ListBuffer()
