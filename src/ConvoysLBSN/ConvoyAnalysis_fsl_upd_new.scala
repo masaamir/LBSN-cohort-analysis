@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 /**
  * Created by MAamir on 30-03-2016.
  */
-class ConvoyAnalysis_fsl_upd {
+class ConvoyAnalysis_fsl_upd_new {
   def stringToDate(dateString: String): Date = {
     val updateDate = dateString.replaceAll("T", "").replaceAll("Z", "")
     val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss")
@@ -118,27 +118,14 @@ class ConvoyAnalysis_fsl_upd {
 
   /** Get all the convoys in the LBSN */
   def getConvoys(checkinsFile: String, friendsFile: String, deltaTS: Long, writeFilePath: String): Unit = {
-    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss")
+    //val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss")
     val timeUnit = (1000 * 60 ) // in minutes now //*24
     val TSMap = getDataSnapShots(checkinsFile, friendsFile, deltaTS * timeUnit, timeUnit) //Divide the data set into SnapShots on the basis of given time unit
     val writeFile = new PrintWriter(new File(writeFilePath))
     //val writerValuesFile=new PrintWriter(new File(writeFileValues))
     val m = 2 // min. no. of users a convoy should have
     val k = 2 //min. no. of locs a convoy should have visited
-    //val minConvoyDistinctLocSize = 2
 
-    //writeFile.println("TSMAP size" + TSMap.size) //TSMAP=Array[(t1,t2),Hash[user,location]]
-    var convoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // all convoys
-    var currentConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // convoys that are currently progressing
-    //Convoy=List[(Users,VisitedLocations,TimeStamps)]
-    var loc: Long = 0L
-    val start = 0 //3390//0
-    val end = TSMap.size
-    // initialize all data structures here to save memory
-
-    var addConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // all convoys
-    var delConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer()
-    var filteredConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer()
     var CC: ListBuffer[(ListBuffer[Long], Long, Long)] = new ListBuffer()
 
     // new algorithm
@@ -162,15 +149,11 @@ class ConvoyAnalysis_fsl_upd {
       loopCheck = true
       CC = new ListBuffer()
       CC = ts._2.groupBy(t => t._2).map(t => (t._2.map(it => it._1).to[ListBuffer], t._1, ts._3)).to[ListBuffer]
-      //CC=CC.filter(t=> t._1.contains(11) && t._1.contains(0))
-      //println("Time stamp groups::"+CC)
       time = ts._3
 
       Vnext = new ListBuffer[Convoy]()
       if (CC != null && CC.size > 0) {
         C = timeStampToConvoy(CC)
-        //println("Converted convoy::")
-        //C.foreach(t=> println(t.getUsers(),t.getLocations()))
       } else {
         V.foreach { v: Convoy =>
           if (v.lifeTime() >= k && v.getLocations().size >=k) {
@@ -185,7 +168,6 @@ class ConvoyAnalysis_fsl_upd {
         C.foreach { c: Convoy =>
           c.setMatched(false)
           c.setAbsorbed(false)
-          //System.out.println(c)
         }
         V.foreach { v: Convoy =>
           v.setExtended(false)
@@ -195,16 +177,11 @@ class ConvoyAnalysis_fsl_upd {
               v.setExtended(true)
               c.setMatched(true)
               var vext: Convoy = new Convoy()
-              //println("going to insert new convoy::"+v.intersection(c), c.getLocations(),v.getStartTime(), time)
               newLocs= if(v.getLocations().last == c.getLocations().last)v.getLocations() else v.getLocations()++c.getLocations()
               newTimeStamp=v.getTimeStamps() ++c.getTimeStamps()
               vext = vext.createConvoy(v.intersection(c), newLocs,newTimeStamp,v.getStartTime(), time)
               Vnext = updateVnext(Vnext, vext) /** update new one !! with more locations*/
-              //println("testing v subset c")
-              //println("v,c::"+v.getUsers(),c.getUsers())
-              //println("v.getusers.cntains(c.getuser)"+v.getUsers().toSet.subsetOf(c.getUsers().toSet))
               if (v.isSubset(c)) {
-                //println("true in loop")
                 v.setAbsorbed(true)
               }
               if (c.isSubset(v)) {
@@ -224,34 +201,22 @@ class ConvoyAnalysis_fsl_upd {
           }
         }
         V = Vnext
-        //++ time
       } //loop check
     }
-    //println("V size is ::"+V.size)
     V.foreach { v:Convoy =>
-      //println("convoy, life time::"+v.getUsers(),v.getLocations(),v.lifeTime())
       if (v.lifeTime() >= k && v.getLocations().size >=k) {
-        //println("inside life time")
         Vpcc += v
       }
 
     }
-
-    /*println("size is::"+Vpcc.size)
-    Vpcc.foreach{t=>
-      println("convoys "+t.getUsers(),t.getLocations(),t.getTimeStamps())
-    }*/
     println("size is::"+Vpcc.size)
     Vpcc.foreach{c=>
-      //writeFile.println(c.getUsers(),c.getLocations(),c.getTimeStamps())
       writeFile.println(c.getUsers().mkString(",")+"\t"+c.getLocations().mkString(",")+"\t"+c.getTimeStamps().mkString(","))
     }
     writeFile.close()
-
   }
-  //testing
 
-  /** Remove conseuctive duplicates from the list */
+  /** Remove consecutive duplicates from the list */
   def compress[T](values: List[T]): List[T] =
     compressTail(Nil, values)
 

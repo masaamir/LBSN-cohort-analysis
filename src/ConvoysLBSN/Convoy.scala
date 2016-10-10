@@ -94,7 +94,7 @@ class Convoy  {
   def getStartTime():Long= {
     return startTime;
   }
-  def createConvoy(inList:(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long],Long,Long)): Convoy={ //inList:{Users},{locs},{TimeStamps},timeStampId
+  /*def createConvoyOld(inList:(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long],Long,Long)): Convoy={ //inList:{Users},{locs},{TimeStamps},timeStampId
     val convoy:Convoy = new Convoy()
     inList._1.foreach{u=> //add users
       convoy.addUsers(u)
@@ -106,15 +106,39 @@ class Convoy  {
     inList._3.foreach{t=> // add timeStamps
       convoy.addTimeStamp(t)
     }
-
-
-
     convoy.startTime=inList._4
     convoy.endTime=inList._5
     //convoy.setTime(inList._3)
     //convoy.users=convoy.users.sortBy(t=> t)
      // convoy.getUsers().sortBy(t=> t)
     return convoy
+  }*/
+  def createConvoy(inList:(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long],Long,Long)): Convoy={ //inList:{Users},{locs},{TimeStamps},timeStampId
+    //val convoy:Convoy = new Convoy()
+    /*inList._1.foreach{u=> //add users
+      convoy.addUsers(u)
+    }*/
+    //convoy.
+    users ++=inList._1
+    //println("get users::"+convoy.getUsers())
+    /*inList._2.foreach{l=> // add locations
+      convoy.addLocations(l)
+    }*/
+    //convoy.
+    locations ++=inList._2
+    /*inList._3.foreach{t=> // add timeStamps
+      convoy.addTimeStamp(t)
+    }*/
+    //convoy.
+    timeStamps ++=inList._3
+    //convoy.
+    startTime=inList._4
+    //convoy.
+    endTime=inList._5
+    //convoy.setTime(inList._3)
+    //convoy.users=convoy.users.sortBy(t=> t)
+    // convoy.getUsers().sortBy(t=> t)
+    return this
   }
 
 }
