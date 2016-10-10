@@ -17,8 +17,248 @@ import scala.collection.mutable.ListBuffer
  * Created by MAamir on 9/23/2016.
  */
 class ConvoysPatternAnalysis {
-  //github test new
+
   var filteredFriends: Map[Long, List[(Long, Long)]] = Map()
+  def getAttributesFromConvoys(visitor:ListBuffer[Long], pConvoy:ListBuffer[(ListBuffer[(Long)],ListBuffer[(Long)],ListBuffer[String])])
+  : (ListBuffer[Long],ListBuffer[Long],ListBuffer[String]) ={
+    var companions:ListBuffer[Long]=new ListBuffer()
+    var locations:ListBuffer[Long]=new ListBuffer()
+    var categories:ListBuffer[String]=new ListBuffer()
+    //var companCat:ListBuffer[String]=new ListBuffer()
+    //var compCatMap:ListBuffer[(Long,ListBuffer[String])]=new ListBuffer()
+    //println("Total convoys are::"+pConvoy)
+    pConvoy.foreach{it=>
+      companions ++= it._1
+      locations ++= it._2
+      categories ++= it._3
+    }
+    //println("before ::"+companions)
+    companions= companions.distinct -- visitor
+    //println("after"+companions)
+    (companions.distinct,locations.distinct,categories.distinct)
+  }
+  def evaluateCategoryAffect5(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
+  val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
+      .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
+      //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
+      .groupBy(t=> t._2).map(t=> (t._1, t._2.map(it=> (it._8,it._9,it._10)).distinct)).toList//group by user : {user - {convoy table tuple with user}}
+      .map(t=> (t._1,t._2.map(it=> (it._1.split(",").map(iit=> iit.toLong).to[ListBuffer],it._2.split(",").map(iit=> iit.toLong).to[ListBuffer],it._3.split(",").to[ListBuffer])).to[ListBuffer]))
+      .filter(t=> t._1==14812)
+      .foreach{t=>
+        val cats:ListBuffer[String]=new ListBuffer()
+        t._2.foreach{it=>
+          if(it._1.contains(10514))
+            cats ++= it._3
+        }
+        println("Contained Categories are ::"+cats.distinct.mkString(","))
+      }
+
+
+  }
+  def evaluateCategoryAffect4(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
+  val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
+      .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
+      //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
+      .groupBy(t=> t._2).map(t=> (t._1, t._2.map(it=> (it._8,it._9,it._10)).distinct)).toList//group by user : {user - {convoy table tuple with user}}
+      .map(t=> (t._1,t._2.map(it=> (it._1.split(",").map(iit=> iit.toLong).to[ListBuffer],it._2.split(",").map(iit=> iit.toLong).to[ListBuffer],it._3.split(",").to[ListBuffer])).to[ListBuffer]))
+      .sortBy(t=> -t._2.size).take(1)
+      .map{t=>
+        val cVisitor=t._1
+        val userConvoys= t._2.distinct
+        val minusVisitors=ListBuffer(cVisitor)
+        println("Minus visitor is ::"+minusVisitors)
+        val convoyAttribs=getAttributesFromConvoys(minusVisitors,userConvoys)
+        val cCampanions:ListBuffer[ConvoyCompanion]=new ListBuffer()
+
+
+        val comps=convoyAttribs._1
+        comps.foreach{c=>
+          val filConvoys=userConvoys.filter(cf=> cf._1.contains(c))
+          val innerConvoyAttrib=getAttributesFromConvoys(ListBuffer(cVisitor,c),filConvoys)
+          cCampanions += new ConvoyCompanion(c,innerConvoyAttrib._1,innerConvoyAttrib._2,innerConvoyAttrib._3)
+        }
+        (cVisitor,cCampanions)
+        new ConvoyVisitor(cVisitor,cCampanions,convoyAttribs._2,convoyAttribs._3)
+ /*       var locations:ListBuffer[Long]=new ListBuffer()
+        var categories:ListBuffer[String]=new ListBuffer()
+        var companCat:ListBuffer[String]=new ListBuffer()
+        var compCatMap:ListBuffer[(Long,ListBuffer[String])]=new ListBuffer()
+        t._2.foreach{it=>
+          companions ++= it._1
+          locations ++= it._2
+          categories ++= it._3
+        }
+        companions= companions.distinct
+        locations=locations.distinct
+        categories=categories.distinct
+*/
+        /*
+        //val userConvoys= t._2.distinct
+        companions.foreach{c=>
+          //companCat._1 += c
+          val filtConvoys=userConvoys.filter(cf=> cf._1.contains(c)) // consider only those convoys which have this user
+          categories.foreach{ct=>
+            val catConvoys=filtConvoys.filter(ffc=> ffc._3.contains(ct)) // consider only those convoys which have this category
+            if(catConvoys.size>0){
+              companCat += ct
+            }
+          }
+          compCatMap += ((c,companCat.distinct))
+        }
+        println()
+        println()
+        println("for user ::"+cVisitor)
+        println("All categories are ::"+categories.mkString(","))
+        println("All companions are ::"+companions.mkString(","))
+        compCatMap.foreach{cM=>
+          if(categories.diff(cM._2).size>0) {
+            println("with user***" + cM._1)
+            println("On categories***" + cM._2.mkString(","))
+            println("Not in !!!!!!" + categories.diff(cM._2))
+          }
+        }
+
+        */
+      }
+      .foreach{v=>
+        println()
+        println()
+        println("For users ::"+v.vId)
+        println("All categories are ::"+v.onCategories  )
+        v.companions.foreach{c=>
+          //val totalCats=c.onCategories
+
+
+          if(v.onCategories.diff(c.onCategories).size>0) {
+            println()
+            println("with user::"+c.vId)
+            println("With categories::" + c.onCategories)
+            println("Not on categories with !!!!!!!!" + v.onCategories.diff(c.onCategories))
+          }else {println("This is max matched")
+            println("with user::"+c.vId)
+            println("With categories::" + c.onCategories)
+            println("Not on categories with !!!!!!!!" + v.onCategories.diff(c.onCategories))
+          }
+        }
+
+      }
+
+
+  }
+  def evaluateCategoryAffect3(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
+  val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
+      .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
+      //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
+      .groupBy(t=> t._2).map(t=> (t._1, t._2.map(it=> (it._8,it._9,it._10)).distinct)).toList//group by user : {user - {convoy table tuple with user}}
+      .map(t=> (t._1,t._2.map(it=> (it._1.split(",").map(iit=> iit.toLong).toList,it._2.split(",").map(iit=> iit.toLong).toList,it._3.split(",").toList))))
+      .sortBy(t=> -t._2.size).take(100)
+      .foreach{t=>
+        val cVisitor=t._1
+        var companions:ListBuffer[Long]=new ListBuffer()
+        var locations:ListBuffer[Long]=new ListBuffer()
+        var categories:ListBuffer[String]=new ListBuffer()
+        var companCat:ListBuffer[String]=new ListBuffer()
+        var compCatMap:ListBuffer[(Long,ListBuffer[String])]=new ListBuffer()
+        t._2.foreach{it=>
+          companions ++= it._1
+          locations ++= it._2
+          categories ++= it._3
+        }
+        companions= companions.distinct
+        locations=locations.distinct
+        categories=categories.distinct
+
+        val userConvoys= t._2.distinct
+        companions.foreach{c=>
+          //companCat._1 += c
+          val filtConvoys=userConvoys.filter(cf=> cf._1.contains(c)) // consider only those convoys which have this user
+          categories.foreach{ct=>
+            val catConvoys=filtConvoys.filter(ffc=> ffc._3.contains(ct)) // consider only those convoys which have this category
+            if(catConvoys.size>0){
+              companCat += ct
+            }
+          }
+          compCatMap += ((c,companCat.distinct))
+        }
+        println()
+        println()
+        println("for user ::"+cVisitor)
+        println("All categories are ::"+categories.mkString(","))
+        println("All companions are ::"+companions.mkString(","))
+        compCatMap.foreach{cM=>
+          if(categories.diff(cM._2).size>0) {
+            println("with user***" + cM._1)
+            println("On categories***" + cM._2.mkString(","))
+            println("Not in !!!!!!" + categories.diff(cM._2))
+          }
+        }
+      }
+
+
+  }
+  def evaluateCategoryAffect2(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
+    val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
+      .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
+      //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
+      .groupBy(t=> t._2).map(t=> (t._1, t._2.map(it=> (it._8,it._9,it._10)).distinct)).toList//group by user : {user - {convoy table tuple with user}}
+      .sortBy(t=> -t._2.size).take(10)
+      .map{t=>
+        (t._1,
+          t._2.groupBy(it=> it._3).toList.distinct)
+      }
+        .map{t=>
+          val newInnerTuple=t._2.map{it=>
+
+            val UUsers:ListBuffer[String]=new ListBuffer()
+            val ULocs:ListBuffer[String]=new ListBuffer()
+            val UCategories:ListBuffer[String]=new ListBuffer()
+            it._2.map{iit=>
+              UUsers ++= iit._1.split(",").to[ListBuffer]
+              ULocs ++= iit._2.split(",").to[ListBuffer]
+              UCategories ++= iit._3.split(",").to[ListBuffer]
+            }
+
+            (it._1,UUsers.distinct,ULocs.distinct,UCategories.distinct)
+          }
+
+          (t._1,newInnerTuple)
+        }
+      .foreach{t=>
+        println()
+        println()
+        println("For user:: -------------------- "+t._1)
+        t._2.foreach{it=>
+          println("Category :: **************** "+ it._1)
+          println("Users::"+it._2.mkString(","))
+          println("Locations Size::"+it._3.size)
+          //println("Categories::"+it._4)
+        }
+      }
+
+  }
+
+  def evaluateCategoryAffect(fileConvoyTable:String): Unit ={
+    val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
+      .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
+    //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
+      .groupBy(t=> t._1).toList//group by user : {user - {convoy table tuple with user}}
+      .sortBy(t=> -t._2.size).take(10)
+        .map{t=>
+          (t._1,
+          t._2.groupBy(it=> it._10 ).toList.distinct)
+        }
+      .foreach{t=>
+        println("For user:: -------------------- "+t._1)
+        t._2.foreach{it=>
+          println("Category :: **************** "+ it._1)
+          it._2.map(innert=> (innert._8,innert._9)).distinct.
+            foreach{iit=> println("users:: "+iit._1)
+              println(" locs::" + iit._2)
+            }
+        }
+      }
+
+  }
 
   def readFile(convoysFile: String): ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = {
     //List[(List[Long],List[Long],List[Long])]
