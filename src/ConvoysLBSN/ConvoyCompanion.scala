@@ -5,9 +5,10 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by aamir on 10/10/16.
   */
-class ConvoyCompanion (inVId:Long,inWithUsers:ListBuffer[Long],
-                       inOnLocations:ListBuffer[Long],inOnCategories:ListBuffer[String]) {
+class ConvoyCompanion (inVId:Long,inConvoysCount:Long,
+                       inWithUsers:ListBuffer[Long],inOnLocations:ListBuffer[Long],inOnCategories:ListBuffer[String]) {
   val vId:Long=inVId
+  val convoyCount=inConvoysCount
   val withUsers:ListBuffer[Long]=inWithUsers
   val onLocations:ListBuffer[Long]=inOnLocations
   val onCategories:ListBuffer[String]=inOnCategories

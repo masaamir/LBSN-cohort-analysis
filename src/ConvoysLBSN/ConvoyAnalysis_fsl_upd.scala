@@ -117,10 +117,12 @@ class ConvoyAnalysis_fsl_upd {
   }
 
   /** Get all the convoys in the LBSN */
-  def getConvoys(checkinsFile: String, friendsFile: String, deltaTS: Long, writeFilePath: String): Unit = {
-    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss")
+  def getConvoys(checkinsFile: String, infriendsFile: String, deltaTS: Long, writeFilePath: String): Unit = {
+    //val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss")
     val timeUnit = (1000 * 60 ) // in minutes now //*24
-    val TSMap = getDataSnapShots(checkinsFile, friendsFile, deltaTS * timeUnit, timeUnit) //Divide the data set into SnapShots on the basis of given time unit
+    val TSMap = getDataSnapShots(checkinsFile, infriendsFile, deltaTS * timeUnit, timeUnit) //Divide the data set into SnapShots on the basis of given time unit
+    println("Time Stamp Completed")
+    println("Convoy mining started.")
     val writeFile = new PrintWriter(new File(writeFilePath))
     //val writerValuesFile=new PrintWriter(new File(writeFileValues))
     val m = 2 // min. no. of users a convoy should have
@@ -156,7 +158,7 @@ class ConvoyAnalysis_fsl_upd {
 
     TSMap.foreach { ts => // time stamp: (startTime,EndTime), Hash(user, locs), TimeStampID
       count= count +1
-      if(count%1000==0)
+      if(count%1==0)
         println(count,total)
 
       loopCheck = true
@@ -263,7 +265,7 @@ class ConvoyAnalysis_fsl_upd {
     }
 
   /** Divide the LBSN into timeStamps on the basis of given time unit */
-  def getDataSnapShots(checkinsFile: String, friendsFile: String, deltaTS: Long, convertMSecTo: Long)
+  def getDataSnapShots(checkinsFile: String, infriendsFile: String, deltaTS: Long, convertMSecTo: Long)
   : Array[((Double, Double), scala.collection.mutable.HashMap[Long, Long], Long)] = {
     //val df:DateFormat=new SimpleDateFormat("yyyy-mm-dd:hh:mm:ss")
     val sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")

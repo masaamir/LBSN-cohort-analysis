@@ -1,14 +1,39 @@
 package FormatData
 
 import java.io.{File, PrintWriter}
+import java.text.{DateFormat, SimpleDateFormat}
 import java.util.Date
+
 import Basic._
+
 import scala.collection.mutable.ListBuffer
 
 /**
  * Created by MAamir on 4/25/2016.
  */
 class fileReaderLBSN {
+  def dateToString(inDate:Date): String ={// standard which is read
+  val df:DateFormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    val stringDate=df.format(inDate)
+    return stringDate
+  }
+  def writeCheckinsInFile(checkins: List[(Long, Date, Double, Double, String, Long)], writeFile:String): Unit ={
+    val writer = new PrintWriter(new File(writeFile))
+    checkins.foreach { t =>
+      writer.println(t._1 + "\t" + dateToString(t._2)+ "\t" + t._3 + "\t" + t._4 + "\t" + t._5 + "\t" + t._6)
+    }
+    writer.close()
+
+  }
+  def readCheckinFileNew(checkinFile: String): List[(Long, Date, Double, Double, String, Long)] = {
+    // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
+    val df = new DataFormatter // data formatter object
+    val checkins = scala.io.Source.fromFile(checkinFile).getLines()
+        .map(t => t.split("\t"))
+        .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong))
+        .toList.distinct
+    return checkins //{(user,Date,lat,lon,locStr,LocLong,dateStringActual)}
+  }
   def readCheckinFile(checkinFile: String): List[(Long, Date, Double, Double, String, Long, String)] = {
     // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
     val df = new DataFormatter // data formatter object

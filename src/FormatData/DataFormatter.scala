@@ -15,10 +15,12 @@ class DataFormatter {
   // convert string to date:
   def stringToDate(dateString: String): Date = {
     val updateDate = dateString.replaceAll("T", "").replaceAll("Z", "")
-    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-mm-ddhh:mm:ss")
+    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddhh:mm:ss")
     val date: Date = formatter.parse(updateDate)
     return date
   }
+
+
 
   def writeLBSNData(friends: List[(Long, Long)], checkins: List[(Long, Date, Double, Double, String, Long, String)], friendsFileWrite: String, checkinFileWrite: String): Unit = {
     val friendWriter = new PrintWriter(new File(friendsFileWrite))

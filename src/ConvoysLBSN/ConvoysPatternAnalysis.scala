@@ -19,6 +19,26 @@ import scala.collection.mutable.ListBuffer
 class ConvoysPatternAnalysis {
 
   var filteredFriends: Map[Long, List[(Long, Long)]] = Map()
+  def sortFriends(inFriendships:ListBuffer[(Long,Long)]): ListBuffer[(Long,Long)] ={
+    val newFriendships=inFriendships.map{t=>
+      if(t._1>t._2) (t._2,t._1) else t
+    }
+    return newFriendships.distinct
+  }
+  def getFriendsForUsers(inUsers:ListBuffer[(Long)],inFriendships:ListBuffer[(Long,Long)]): Map[Long,ListBuffer[Long]] ={
+    // No assumption// assumption is: edges are duplicated such that for each user all his friends are present from source - dest id
+    val friends=sortFriends(inFriendships)
+
+    val newFriends=inUsers.map{t=>
+      val localFriends:ListBuffer[Long]=new ListBuffer[Long]()
+      inFriendships.filter(it=> it._1==t || it._2==t).foreach{tup=>
+        if(tup._1==t) localFriends+= tup._2 else localFriends+=tup._1
+      }
+      (t,localFriends.distinct)
+    }
+
+    return newFriends.toMap
+  }
   def getAttributesFromConvoys(visitor:ListBuffer[Long], pConvoy:ListBuffer[(ListBuffer[(Long)],ListBuffer[(Long)],ListBuffer[String])])
   : (ListBuffer[Long],ListBuffer[Long],ListBuffer[String]) ={
     var companions:ListBuffer[Long]=new ListBuffer()
@@ -55,30 +75,48 @@ class ConvoysPatternAnalysis {
 
 
   }
-  def evaluateCategoryAffect4(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
-  val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
+  def getCategoryCountInConvoys(cat:ListBuffer[String], pConvoy:ListBuffer[(ListBuffer[(Long)],ListBuffer[(Long)],ListBuffer[String])])
+  : ListBuffer[(String,Int)] ={
+    val convoys=pConvoy.distinct
+    val catCountPair=cat.map{t=>
+
+      val con=convoys.filter{it=>
+        it._3.contains(t)}
+      println("category::"+t)
+      println("convoy::"+con)
+      (t, con.size)
+    }
+
+    return catCountPair
+  }
+  def evaluateCategoryAffect4(fileConvoyTable:String, friendsFile:String): Unit ={ // user, companions, categories, locs
+  val fr=new fileReaderLBSN
+    val friendships=fr.readFriendsFile(friendsFile)
+    val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
       .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
       //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
       .groupBy(t=> t._2).map(t=> (t._1, t._2.map(it=> (it._8,it._9,it._10)).distinct)).toList//group by user : {user - {convoy table tuple with user}}
       .map(t=> (t._1,t._2.map(it=> (it._1.split(",").map(iit=> iit.toLong).to[ListBuffer],it._2.split(",").map(iit=> iit.toLong).to[ListBuffer],it._3.split(",").to[ListBuffer])).to[ListBuffer]))
-      .sortBy(t=> -t._2.size).take(1)
+      .sortBy(t=> -t._2.size).take(100)
+        //.filter(t=> t._1==1777)
       .map{t=>
         val cVisitor=t._1
         val userConvoys= t._2.distinct
         val minusVisitors=ListBuffer(cVisitor)
-        println("Minus visitor is ::"+minusVisitors)
+        //println("Minus visitor is ::"+minusVisitors)
         val convoyAttribs=getAttributesFromConvoys(minusVisitors,userConvoys)
         val cCampanions:ListBuffer[ConvoyCompanion]=new ListBuffer()
 
 
         val comps=convoyAttribs._1
         comps.foreach{c=>
-          val filConvoys=userConvoys.filter(cf=> cf._1.contains(c))
+          val filConvoys=userConvoys.filter(cf=> cf._1.contains(c)).distinct
           val innerConvoyAttrib=getAttributesFromConvoys(ListBuffer(cVisitor,c),filConvoys)
-          cCampanions += new ConvoyCompanion(c,innerConvoyAttrib._1,innerConvoyAttrib._2,innerConvoyAttrib._3)
+          cCampanions += new ConvoyCompanion(c,filConvoys.size.toLong,innerConvoyAttrib._1,innerConvoyAttrib._2,innerConvoyAttrib._3)
         }
         (cVisitor,cCampanions)
-        new ConvoyVisitor(cVisitor,cCampanions,convoyAttribs._2,convoyAttribs._3)
+        //new ConvoyVisitor(cVisitor,userConvoys.size.toLong,cCampanions,convoyAttribs._2,convoyAttribs._3)
+        new ConvoyVisitor(cVisitor,userConvoys.size.toLong,cCampanions,convoyAttribs._2,convoyAttribs._3,userConvoys)
  /*       var locations:ListBuffer[Long]=new ListBuffer()
         var categories:ListBuffer[String]=new ListBuffer()
         var companCat:ListBuffer[String]=new ListBuffer()
@@ -124,20 +162,33 @@ class ConvoysPatternAnalysis {
         println()
         println()
         println("For users ::"+v.vId)
+        /**only companion friends*/
+        //val friendshipMap=getFriendsForUsers(ListBuffer(v.vId),friendships.to[ListBuffer])
+        //val userFriends=friendshipMap.getOrElse(v.vId,ListBuffer())
+        //val companions=v.companions.map(t=> t.vId).distinct.filter(t=> userFriends.contains(t))
+        //println("No of friends/ no. of companions::"+userFriends.size+"/"+companions.size)
         println("All categories are ::"+v.onCategories  )
-        v.companions.foreach{c=>
+        v.companions.sortBy(t=> -t.convoyCount).take(10)
+            //.filter(t=> t.vId==2511  )
+          .foreach{c=>
           //val totalCats=c.onCategories
-
-
           if(v.onCategories.diff(c.onCategories).size>0) {
             println()
             println("with user::"+c.vId)
+            println("Convoys: total /current users::"+v.convoyCount+"/"+c.convoyCount)
             println("With categories::" + c.onCategories)
             println("Not on categories with !!!!!!!!" + v.onCategories.diff(c.onCategories))
+            println("size is ::"+getCategoryCountInConvoys(v.onCategories.diff(c.onCategories),v.convoys).size)
+            println()
+            getCategoryCountInConvoys(v.onCategories.diff(c.onCategories),v.convoys).foreach{t=>
+              println(t)
+            }
           }else {println("This is max matched")
             println("with user::"+c.vId)
             println("With categories::" + c.onCategories)
             println("Not on categories with !!!!!!!!" + v.onCategories.diff(c.onCategories))
+
+            //println("Not on categories with !!!!!!!!" + getCategoryCountInConvoys(v.onCategories.diff(c.onCategories),v.convoys))
           }
         }
 

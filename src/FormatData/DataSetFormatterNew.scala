@@ -13,6 +13,19 @@ import scala.collection.mutable.ListBuffer
  */
 class DataSetFormatterNew {
 
+  def formatJiepangData(fileData:String): Unit ={
+    val jiepangData=scala.io.Source.fromFile(fileData).getLines().drop(1).toList.map(t=> t.split("\t"))
+      .map(t=> (t(0).toLong,t(1),t(2).toDouble,t(3).toDouble, t(4).toLong))
+    val users=jiepangData.map(t=> t._1).distinct
+    println("total users::"+users.size)
+    val locations=jiepangData.map(t=> t._5).distinct
+    println("total locations::"+locations.size)
+    println("check-ins size is::"+jiepangData.size)
+
+    //jiepangData.take(10)
+      //.foreach(println)
+
+  }
   def formatFSDataSet(friendsFile: String, checkinFile: String, friendWrite: String, checkInWrite: String): Unit = {
     val fWriter = new PrintWriter(new File(friendWrite))
     val chkWriter = new PrintWriter(new File(checkInWrite))
