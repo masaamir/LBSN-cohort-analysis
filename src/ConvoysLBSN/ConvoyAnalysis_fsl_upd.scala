@@ -17,6 +17,7 @@ class ConvoyAnalysis_fsl_upd {
     val date: Date = formatter.parse(updateDate)
     return date
   }
+  //test
 
   def removeConsecutiveLocs(inconvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])]):
   ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = {
