@@ -1,9 +1,10 @@
 package FormatData
 
 import java.io.{File, PrintWriter}
-import java.text.SimpleDateFormat
+import java.text.{DateFormat, SimpleDateFormat}
 import java.util.Date
 
+import ConvoysLBSN.ConvoysPatternAnalysis
 import CoordinateConversion.{Angle, UTMCoord}
 
 import scala.collection.mutable.ListBuffer
@@ -19,7 +20,100 @@ class DataFormatter {
     val date: Date = formatter.parse(updateDate)
     return date
   }
+  def dateToString(inDate:Date): String ={// standard which is read
+  val df:DateFormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    //println("original is ::"+inDate)
 
+    val stringDate=df.format(inDate)
+    //println("returned ::"+stringDate)
+    //println ("agrain read ::"+stringToDate(stringDate))
+    return stringDate
+  }
+  def associateCheckinId(checkins:List[(Long,Date,Double,Double,String,Long,String)]):
+  List[(Long,Date,Double,Double,String,Long,String,Long)] ={
+    //input={u,t,lat,lon,locStr,locId,Cats}
+    //output={u,t,lat,lon,locStr,locId,Cats,checkinId
+    var cId:Long=0
+    val newCheckins=checkins.map{t=>
+      cId += 1
+      (t._1,t._2,t._3,t._4,t._5,t._6,t._7,cId)
+    }
+    return newCheckins
+  }
+
+  def getConvoysWithCats(convoysFile:String, venuesFile:String, writeConvoysWithCat:String): Unit ={
+    val cpa=new ConvoysPatternAnalysis
+    val fr=new fileReaderLBSN
+    val writer=new PrintWriter(new File(writeConvoysWithCat))
+    val convoys=cpa.readConvoysFile(convoysFile)
+    val venues=fr.readVenuesFileWee(venuesFile)
+    val venueMap=venues.map(t=> (t.lId,t.lCategories)).toMap
+    var cats:ListBuffer[String]=new ListBuffer()
+    val newConvoys=convoys.map{c=>
+      cats=new ListBuffer()
+      c._1.foreach{l=>
+        if(venueMap.contains(l))
+        cats ++= venueMap.getOrElse(l,ListBuffer("n\\a"))
+      }
+      (c._1,c._2,c._3,cats)
+    }
+    newConvoys.foreach{c=>
+      writer.println(c._1.mkString(",")+"\t"+c._2.mkString(",")+"\t"+c._3.mkString(",")+"\t"+c._4.mkString(","))
+    }
+    writer.close
+  }
+
+  def splitCheckinsOnCats(fileCheckinsWithCats:String)
+  : ListBuffer[(Long,Date,Double,Double,String,Long,String,Long,String)] ={
+    val fr=new fileReaderLBSN
+    var checkinsWithCats=fr.readCheckinsWithCats(fileCheckinsWithCats)
+    println("total checkins with Cats::"+checkinsWithCats.size)
+    checkinsWithCats=checkinsWithCats.filter(t=> t._7!="n\\a")
+    //println("total checkins with cat not null::"+checkinsWithCats.size)
+    val checksWithId=associateCheckinId(checkinsWithCats)
+    println("checkins with ids::"+checksWithId.size)
+    val splitCheckins:ListBuffer[(Long,Date,Double,Double,String,Long,String,Long,String)]=new ListBuffer()
+    var catCount=0
+    checksWithId.foreach{t=>
+      val cats=t._7.split(",")
+      catCount +=cats.size
+      cats.foreach{c=>
+        if(c!="n\\a")
+        splitCheckins+= ((t._1,t._2,t._3,t._4,t._5,t._6,t._7,t._8,c))
+      }
+    }
+    println("split checkins size::"+splitCheckins.size)
+    println("cat count is::"+catCount)
+    //splitCheckins.take(100).foreach(println)
+    return splitCheckins
+  }
+
+  def getCheckinsWithCategories(fileCheckins:String,fileVenues:String, fileWriteCheckWithCat:String): Unit ={
+    val fr=new fileReaderLBSN
+    val checkins=fr.readCheckinFileNew(fileCheckins)
+    //checkins=checkins.filter(t=> t._1==23).sortBy(t=> t._2).take(10)
+      //checkins.foreach(println)
+    val venues=fr.readVenuesFileWee(fileVenues)
+    val writer=new PrintWriter(new File(fileWriteCheckWithCat))
+    val lCatMap=venues.map(t=> (t.lId,t.lCategories)).toMap
+    val newCheckins:ListBuffer[(Long,Date,Double,Double,String,Long,String)]=new ListBuffer()
+    checkins.foreach{t=>
+      if(lCatMap.contains(t._6)) {
+        val cats = lCatMap.getOrElse(t._6, null)
+        if(cats!=null && cats != "n\\a") {
+          writer.println(t._1+"\t"+dateToString(t._2)+"\t"+ t._3+"\t"+t._4+"\t"+t._5+"\t"+t._6+"\t"+cats.mkString(","))
+          newCheckins += ((t._1, t._2, t._3, t._4, t._5, t._6, cats.mkString(",")))
+        }
+
+      }
+      /*else{
+        println(" id doesn't exist ::"+t._6)
+      }*/
+    }
+    writer.close()
+    println("Total checkins are ::"+checkins.size)
+    println("new Checkins are ::"+newCheckins.size)
+  }
 
 
   def writeLBSNData(friends: List[(Long, Long)], checkins: List[(Long, Date, Double, Double, String, Long, String)], friendsFileWrite: String, checkinFileWrite: String): Unit = {

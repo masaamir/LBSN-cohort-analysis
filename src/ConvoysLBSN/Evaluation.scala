@@ -6,23 +6,30 @@ import java.util.Date
 
 import FormatData.fileReaderLBSN
 
+import scala.collection.mutable.ListBuffer
+
 /**
   * Created by aamir on 13/10/16.
   */
 class Evaluation {
+  var friends: Map[List[Long], List[Long]] = Map()
+
   def stringToDate(dateString: String): Date = {
     val updateDate = dateString.replaceAll("T", "").replaceAll("Z", "")
     val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddhh:mm:ss")
     val date: Date = formatter.parse(updateDate)
     return date
   }
-  def dateToString(inDate:Date): String ={// standard which is read
-    val df:DateFormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-    val stringDate=df.format(inDate)
+
+  def dateToString(inDate: Date): String = {
+    // standard which is read
+    val df: DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    val stringDate = df.format(inDate)
     return stringDate
   }
-  def createDatasetForCrossValidation(inPercentTest:Double,inCCheckinsFile:String,inTrainCheckinFile:String,inTestCheckinFile:String): Unit ={
-    val fr=new fileReaderLBSN
+
+  def createDatasetForCrossValidation(inPercentTest: Double, inCCheckinsFile: String, inTrainCheckinFile: String, inTestCheckinFile: String): Unit = {
+    val fr = new fileReaderLBSN
     /*val tempCheckins = scala.io.Source.fromFile(inCCheckinsFile).getLines().take(2)
       .map(t => t.split("\t"))
       .map{t =>
@@ -33,24 +40,238 @@ class Evaluation {
         dateToString(stringToDate(t(1)))
         (t(0).toLong, stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(1))}
       .toList.distinct*/
-    val totalCheckins=fr.readCheckinFileNew(inCCheckinsFile).sortBy(t=> t._2)
-    println("minimum Date::"+totalCheckins.minBy(t=> t._2)._2)
-    println("maximum Date::"+totalCheckins.maxBy(t=> t._2)._2)
+    val totalCheckins = fr.readCheckinFileNew(inCCheckinsFile).sortBy(t => t._2)
+    println("minimum Date::" + totalCheckins.minBy(t => t._2)._2)
+    println("maximum Date::" + totalCheckins.maxBy(t => t._2)._2)
 
-    val partIndex=totalCheckins((totalCheckins.size *inPercentTest).floor.toInt)
+    val partIndex = totalCheckins((totalCheckins.size * inPercentTest).floor.toInt)
     //divide total data-set into to two parts first on the basis of number of tuple and then make them separate on the basis of time stamps
     //println("partition Index::"+partIndex.size)
-    val partIndexTime=partIndex._2
-    println("partition Date::"+partIndexTime)
-    println("Total Checkins::"+totalCheckins.size)
-    val trainCheckins=totalCheckins.filter(t=> t._2.before(partIndexTime) || t._2==partIndexTime)
-    println("Training tuple size::"+trainCheckins.size)
-    val testCheckins=totalCheckins.filter(t=> t._2.after(partIndexTime))
-    println("Testing tuple size::"+testCheckins.size)
-    /**writing check-ins for training data-set*/
-    fr.writeCheckinsInFile(trainCheckins,inTrainCheckinFile)
-    /**writing check-ins for testing data-set*/
-    fr.writeCheckinsInFile(testCheckins,inTestCheckinFile)
+    val partIndexTime = partIndex._2
+    println("partition Date::" + partIndexTime)
+    println("Total Checkins::" + totalCheckins.size)
+    val trainCheckins = totalCheckins.filter(t => t._2.before(partIndexTime) || t._2 == partIndexTime)
+    println("Training tuple size::" + trainCheckins.size)
+    val testCheckins = totalCheckins.filter(t => t._2.after(partIndexTime))
+    println("Testing tuple size::" + testCheckins.size)
+
+    /** writing check-ins for training data-set */
+    fr.writeCheckinsInFile(trainCheckins, inTrainCheckinFile)
+
+    /** writing check-ins for testing data-set */
+    fr.writeCheckinsInFile(testCheckins, inTestCheckinFile)
   }
+
+  def findMaxPairGreedy(userScorePair: List[(Long, Double)], friends: Map[Long, List[Long]], k: Int)
+  : (ListBuffer[Long],Double) = {
+    val groupScorePair: List[(ListBuffer[Long], Double)] = userScorePair.map(t => (ListBuffer(t._1), t._2))
+    //val groupFriends=friends.map(t=> (List(t._1),t._2)).toMap
+    var currentPair: (ListBuffer[Long], Double) = groupScorePair.head
+    val headGroup = currentPair._1
+    for (i: Int <- 1 until k) {
+      // there might not be a group of k users
+      if (headGroup.size < i ) {
+        println("no more increase in group size")
+
+      } else {
+        var loopContinue = true
+        for (j: Int <- 0 until userScorePair.size) {
+          if (loopContinue) {
+            val cUser = userScorePair(j)._1
+            if (!headGroup.contains(cUser)) {
+              // if group doesn't already contain this element
+              // check if the whole group is friend with this member:cUser
+              var groupFriend = true
+              headGroup.foreach { t =>
+                if (!friends.getOrElse(t, null).contains(cUser)) {
+                  groupFriend = false
+                }
+              }
+              if (groupFriend) {
+                //if whole group is friend
+                //head +=
+                val newHead: ListBuffer[Long] = currentPair._1
+                newHead += cUser
+                currentPair = ((newHead, currentPair._2 + userScorePair(j)._2))
+                loopContinue = false
+              }
+            }
+          }
+        }
+      }
+    }
+    println("current pair is ::"+currentPair)
+    return currentPair
+  }
+
+  /*def findMaxPair(score: List[(List[Long], Double)], lb: Double): Unit = {
+    if (score.size < 2) {
+      return lb
+    } else {
+      var i = 0
+      var j = 0
+      var continue = true
+      for (i <- 0 until score.size) {
+        val head = score(i)._1
+        val headFriends = friends.getOrElse(head, List())
+        if (continue == true) {
+          for (j <- i + 1 until score.size) {
+            if (continue == true) {
+              if (headFriends.contains(score(j))) {
+
+              }
+
+            }
+          }
+
+        }
+
+      }
+
+    }
+  }*/
+
+  def findGroupTopK(userScoreFile: String, k: Int): List[Long] = {
+    val userScores = scala.io.Source.fromFile(userScoreFile).getLines().toList
+      .map(t => t.split("\t")).map(t => (t(0).toLong, t(1).toDouble))
+    val group = userScores.sortBy(t => -t._2).take(k).map(t => t._1)
+    return group
+  }
+
+  def findGroupTopKFriends(userScoreFile: String, k: Int, friendsFile: String): List[Long] = {
+    val userScores = scala.io.Source.fromFile(userScoreFile).getLines().toList
+      .map(t => t.split("\t")).map(t => (t(0).toLong, t(1).toDouble)).sortBy(t => -t._2)
+    val fr = new fileReaderLBSN
+    val friendsMap = fr.readFriendsFile(friendsFile).groupBy(t => t._1).map(t => (t._1, t._2.map(it => it._2)))
+    val maxPair=findMaxPairGreedy(userScores,friendsMap,k)
+    return maxPair._1.toList
+
+  }
+
+
+  def evaluateGroup(inGroup: List[Long], inCat: List[String], convoysTableFile: String): Unit = {
+    val cpa = new ConvoysPatternAnalysis
+    val convoys = scala.io.Source.fromFile(convoysTableFile).getLines().drop(1).toList
+      .map(t => t.split("\t")).map(t => (t(7), t(8), t(9)))
+      .map(t => (t._1.split(",").map(it => it.toLong).toList, t._2.split(",").map(it => it.toLong).toList, t._3.split(",").toList)).distinct
+    println("Convoys are ::" + convoys.size)
+    println("user group::" + inGroup)
+    println("loc categories::" + inCat)
+    val contConvoys = convoys.filter { t =>
+      inGroup.forall(t._1.contains) && inCat.forall(t._3.contains)
+    }
+    println("filtered Convoys size ::" + contConvoys.size)
+
+
+    /*
+    println("contained convoys are below ::")
+    convoys.filter(t=> t._1.contains(9345))// && t._1.contains(9345))
+      .foreach(println)
+    println("contained convoys for cats are below::")
+    //convoys.filter(t=> t._3.contains("Nightlife") && t._3.contains("Bar")).foreach(println)
+    //convoys.foreach(t=> println(t._3))
+    */
+
+  }
+
+
+  def getCheckinsOfUser(checkins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)], user: Long)
+  : ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)] = {
+    val newCheckins = checkins.filter { t =>
+      t._1 == user
+    }
+    return newCheckins
+  }
+
+  def getCheckinsAtCat(checkins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)], cat: String)
+  : ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)] = {
+    val newCheckins = checkins.filter { t =>
+      t._9 == cat
+    }
+    return newCheckins
+  }
+
+  def getCheckinsByUserNCat(checkins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)], user: Long, cat: String)
+  : ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)] = {
+    val newCheckins = checkins.filter { t =>
+      t._1 == user && t._9 == cat
+    }
+    return newCheckins
+  }
+
+  def getCatScore(checkins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)]
+                  , inputCat: List[String], catScorefile: String)
+  : Unit = {
+    val lambada = 0.5
+    val users = checkins.map(t => t._1).distinct
+    val catScoreWriter = new PrintWriter(new File(catScorefile))
+    /*val filteredCheckins=checkins.filter{t=>
+      inputCat.contains(t._9)
+    }*/
+    val CKGroupByCat = checkins.groupBy(t => t._9)
+    println("checkins with cat::" + checkins.size)
+    val CKGroupByUser = checkins.map(t => (t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, "")).distinct
+      .groupBy(t => t._1)
+    var personalizedScore: Double = 0
+    var globalScore: Double = 0
+    //val userScore:Double=0
+    var categoryScore: Double = 0
+    var catCheckins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)] = new ListBuffer()
+    var userCatCheckins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)] = new ListBuffer()
+    println("total users ::" + users.size)
+    var uCount = 0
+    val userScore = users.map { u =>
+      uCount += 1
+      if (uCount % 100 == 0) println(uCount, users.size)
+      //println("user ::"+u)
+      //personalizedScore=0
+      //globalScore=0
+      categoryScore = 0
+      inputCat.foreach { cat =>
+
+        /** Global contribution of user u towards category cat */
+        catCheckins = CKGroupByCat.getOrElse(cat, null) // all check-ins at the given category
+        userCatCheckins = catCheckins.filter(t => t._1 == u) // check-ins of the user at the given category
+        personalizedScore = lambada * (userCatCheckins.size.toDouble / catCheckins.size.toDouble)
+
+        /** personalized preference of user u towards category cat */
+        globalScore = (1 - lambada) * userCatCheckins.size.toDouble / CKGroupByUser.getOrElse(u, ListBuffer()).size.toDouble
+
+        /** score of user u for category */
+        categoryScore += 1.toDouble / inputCat.size.toDouble * (personalizedScore + globalScore)
+      }
+      catScoreWriter.println(u + "\t" + categoryScore)
+      (u, categoryScore)
+    }
+
+    catScoreWriter.close()
+    userScore.sortBy(t => -t._2).take(10).foreach(println)
+  }
+
+  /*
+    def getCatScore(checks: ListBuffer[(Long,Date,Double,Double,String,Long,String,Long,String)], inputCats:List[String]): Unit ={
+      val lambda=0.5
+      val totalCheckGBUsers=checks.groupBy(t=> t._1)
+      val totalChecksGBCats=checks.groupBy(t=> t._9)
+
+      //check-in filtered on given categories of the trip
+      val iCChecks=checks.filter{t=>
+        inputCats.contains(t._9)
+      }
+      val iCCheckGBUsers=iCChecks.groupBy(t=> t._1)
+      val iCCheckGBCats=iCChecks.groupBy(t=> t._9  )
+
+      val users=checks.map(t=> t._1).distinct
+
+      users.map{u=>
+        inputCats.foreach{ic=>
+          val score= 1.toDouble/inputCats.size.toDouble
+          iCCheckGBUsers.getOrElse(u,ListBuffer())
+        }
+
+      }
+
+    }
+  */
 
 }

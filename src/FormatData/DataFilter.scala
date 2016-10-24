@@ -26,6 +26,7 @@ class DataFilter {
     println("Checkins with categories::"+filteredCheckins.size)
 
   }
+
   def filterUsers(friendsFile: String, checkinFile: String, minUserCk: Long, minUserLocs: Long)
   : (List[(Long, Long)], List[(Long, Date, Double, Double, String, Long, String)]) = {
     val fileReaderLBSN = new fileReaderLBSN

@@ -19,12 +19,14 @@ import scala.collection.mutable.ListBuffer
 class ConvoysPatternAnalysis {
 
   var filteredFriends: Map[Long, List[(Long, Long)]] = Map()
+
   def sortFriends(inFriendships:ListBuffer[(Long,Long)]): ListBuffer[(Long,Long)] ={
     val newFriendships=inFriendships.map{t=>
       if(t._1>t._2) (t._2,t._1) else t
     }
     return newFriendships.distinct
   }
+
   def getFriendsForUsers(inUsers:ListBuffer[(Long)],inFriendships:ListBuffer[(Long,Long)]): Map[Long,ListBuffer[Long]] ={
     // No assumption// assumption is: edges are duplicated such that for each user all his friends are present from source - dest id
     val friends=sortFriends(inFriendships)
@@ -39,6 +41,7 @@ class ConvoysPatternAnalysis {
 
     return newFriends.toMap
   }
+
   def getAttributesFromConvoys(visitor:ListBuffer[Long], pConvoy:ListBuffer[(ListBuffer[(Long)],ListBuffer[(Long)],ListBuffer[String])])
   : (ListBuffer[Long],ListBuffer[Long],ListBuffer[String]) ={
     var companions:ListBuffer[Long]=new ListBuffer()
@@ -57,6 +60,7 @@ class ConvoysPatternAnalysis {
     //println("after"+companions)
     (companions.distinct,locations.distinct,categories.distinct)
   }
+
   def evaluateCategoryAffect5(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
   val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
       .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
@@ -75,6 +79,7 @@ class ConvoysPatternAnalysis {
 
 
   }
+
   def getCategoryCountInConvoys(cat:ListBuffer[String], pConvoy:ListBuffer[(ListBuffer[(Long)],ListBuffer[(Long)],ListBuffer[String])])
   : ListBuffer[(String,Int)] ={
     val convoys=pConvoy.distinct
@@ -89,6 +94,7 @@ class ConvoysPatternAnalysis {
 
     return catCountPair
   }
+
   def evaluateCategoryAffect4(fileConvoyTable:String, friendsFile:String): Unit ={ // user, companions, categories, locs
   val fr=new fileReaderLBSN
     val friendships=fr.readFriendsFile(friendsFile)
@@ -196,6 +202,7 @@ class ConvoysPatternAnalysis {
 
 
   }
+
   def evaluateCategoryAffect3(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
   val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
       .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
@@ -247,6 +254,7 @@ class ConvoysPatternAnalysis {
 
 
   }
+
   def evaluateCategoryAffect2(fileConvoyTable:String): Unit ={ // user, companions, categories, locs
     val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
       .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
@@ -288,32 +296,31 @@ class ConvoysPatternAnalysis {
 
   }
 
-  def evaluateCategoryAffect(fileConvoyTable:String): Unit ={
-    val covoyTable=scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
-      .map(t=> t.split("\t")).map(t=> (t(0).toLong,t(1).toLong,t(2).toLong,t(3),t(4).toLong,t(5).toLong,t(6).toLong,t(7),t(8),t(9)))
-    //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
-      .groupBy(t=> t._1).toList//group by user : {user - {convoy table tuple with user}}
-      .sortBy(t=> -t._2.size).take(10)
-        .map{t=>
-          (t._1,
-          t._2.groupBy(it=> it._10 ).toList.distinct)
-        }
-      .foreach{t=>
-        println("For user:: -------------------- "+t._1)
-        t._2.foreach{it=>
-          println("Category :: **************** "+ it._1)
-          it._2.map(innert=> (innert._8,innert._9)).distinct.
-            foreach{iit=> println("users:: "+iit._1)
+  def evaluateCategoryAffect(fileConvoyTable:String): Unit = {
+    val covoyTable = scala.io.Source.fromFile(fileConvoyTable).getLines().drop(1).toList
+      .map(t => t.split("\t")).map(t => (t(0).toLong, t(1).toLong, t(2).toLong, t(3), t(4).toLong, t(5).toLong, t(6).toLong, t(7), t(8), t(9)))
+      //convoyId,user,location,category,UGroupSize,LGroupSize,CategoryGroupSize,UGroup,LGroup,Categories
+      .groupBy(t => t._1).toList //group by user : {user - {convoy table tuple with user}}
+      .sortBy(t => -t._2.size).take(10)
+      .map { t =>
+        (t._1,
+          t._2.groupBy(it => it._10).toList.distinct)
+      }
+      .foreach { t =>
+        println("For user:: -------------------- " + t._1)
+        t._2.foreach { it =>
+          println("Category :: **************** " + it._1)
+          it._2.map(innert => (innert._8, innert._9)).distinct.
+            foreach { iit => println("users:: " + iit._1)
               println(" locs::" + iit._2)
             }
         }
       }
-
   }
+
 
   def readFile(convoysFile: String): ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = {
     //List[(List[Long],List[Long],List[Long])]
-
     val convoys = scala.io.Source.fromFile(convoysFile).getLines().to[ListBuffer]
       .drop(1)
       .map(t => t.toString)
@@ -357,8 +364,6 @@ class ConvoysPatternAnalysis {
     return resultCliques
 
   }
-
-
   /** Get cliques for each user group in convoys */
   def getConvoyWithCliques(filterdConvoy: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])],
                            friendsFilePath: String): ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])] = {
@@ -470,7 +475,7 @@ class ConvoysPatternAnalysis {
     return filteredCCConvoys
   }
 
- var convoyCount=0
+  var convoyCount=0
   def findConvoyStats(convoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[Long])], friendsFile: String): Unit = {
     println("Users groups convoys with their corresponding locations")
     val groupsCount = convoys.groupBy(t => t._1).map(t => (t._1, t._2.size)).toList.sortBy(t => -t._2)
@@ -599,6 +604,7 @@ class ConvoysPatternAnalysis {
     //val convoysWithCC = getConvoyWithConnectedComponents(convoys, friendsFile,1)
     //println("filtered convoy size::" + convoysWithCC.size)
   }
+
   def getPerGroup(convoysFile: String, friendsFile: String, venuesFile: String, fileConvoyTable:String): Unit = {
 
     val writerConvoyTable=new PrintWriter(new File(fileConvoyTable))

@@ -17,6 +17,7 @@ class fileReaderLBSN {
     val stringDate=df.format(inDate)
     return stringDate
   }
+
   def writeCheckinsInFile(checkins: List[(Long, Date, Double, Double, String, Long)], writeFile:String): Unit ={
     val writer = new PrintWriter(new File(writeFile))
     checkins.foreach { t =>
@@ -25,6 +26,7 @@ class fileReaderLBSN {
     writer.close()
 
   }
+
   def readCheckinFileNew(checkinFile: String): List[(Long, Date, Double, Double, String, Long)] = {
     // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
     val df = new DataFormatter // data formatter object
@@ -34,6 +36,7 @@ class fileReaderLBSN {
         .toList.distinct
     return checkins //{(user,Date,lat,lon,locStr,LocLong,dateStringActual)}
   }
+
   def readCheckinFile(checkinFile: String): List[(Long, Date, Double, Double, String, Long, String)] = {
     // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
     val df = new DataFormatter // data formatter object
@@ -42,6 +45,16 @@ class fileReaderLBSN {
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(1)))
         .toList.distinct
     return checkins //{(user,Date,lat,lon,locStr,LocLong,dateStringActual)}
+  }
+
+  def readCheckinsWithCats(checkinWithCatsFile:String): List[(Long, Date, Double, Double, String, Long, String)] ={
+    // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
+    val df = new DataFormatter // data formatter object
+    val checkins = scala.io.Source.fromFile(checkinWithCatsFile).getLines()
+        .map(t => t.split("\t"))
+        .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(6)))
+        .toList.distinct
+    return checkins //{(user,Date,lat,lon,locStr,LocLong, Categories)}
   }
 
   def readVenuesFileWee(venuesFile:String): ListBuffer[Location] ={
