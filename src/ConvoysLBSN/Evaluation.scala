@@ -148,6 +148,31 @@ class Evaluation {
 
   }
 
+  def findTogetherTravelScore(inPair:(List[Long],Long),inCheckins:List[(Long,Date,Double,Double,String,Long,String)]
+                              ,inConvoys:List[(List[Long],List[Long],List[String])]): Unit ={
+    val inGroup= inPair._2 :: inPair._1
+    val newConvoys=inConvoys.filter{c=>
+      inGroup.forall(c._1.contains)
+    }
+    //val
+
+  }
+
+  def callFunGroupScore(checkinsWithCatFile:String, convoysTableFile:String, users:List[Long]): Unit ={
+    val fr=new fileReaderLBSN
+    val checkinsWithCat=fr.readCheckinsWithCats(checkinsWithCatFile)
+    val convoys=fr.readConvoyTableFile(convoysTableFile)
+    val group=users.map(t=> List(t))
+    group.foreach{g=>
+      users.foreach{u=>
+        if(!g.contains(u)){
+          findTogetherTravelScore((g,u),checkinsWithCat,convoys)
+        }
+      }
+    }
+
+  }
+
 
   def evaluateGroup(inGroup: List[Long], inCat: List[String], convoysTableFile: String): Unit = {
     val cpa = new ConvoysPatternAnalysis
@@ -155,12 +180,15 @@ class Evaluation {
       .map(t => t.split("\t")).map(t => (t(7), t(8), t(9)))
       .map(t => (t._1.split(",").map(it => it.toLong).toList, t._2.split(",").map(it => it.toLong).toList, t._3.split(",").toList)).distinct
     println("Convoys are ::" + convoys.size)
-    println("user group::" + inGroup)
-    println("loc categories::" + inCat)
+    println("input user group::" + inGroup)
+    println("input loc categories::" + inCat)
     val contConvoys = convoys.filter { t =>
-      inGroup.forall(t._1.contains) && inCat.forall(t._3.contains)
+      inGroup.forall(t._1.contains) &&
+       inCat.forall(t._3.contains)
     }
     println("filtered Convoys size ::" + contConvoys.size)
+    //println("these convoys are ::")
+    //contConvoys.foreach(t=> println(t))
 
 
     /*

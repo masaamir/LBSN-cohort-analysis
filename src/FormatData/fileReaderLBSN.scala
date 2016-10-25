@@ -102,6 +102,15 @@ return newVenues.distinct
     return friends
   }
 
+  def readConvoyTableFile(convoyTableFile:String): List[(List[Long],List[Long],List[String])] ={
+    val convoys = scala.io.Source.fromFile(convoyTableFile).getLines().drop(1).toList
+      .map(t => t.split("\t")).map(t => (t(7), t(8), t(9)))
+      .map(t => (t._1.split(",")
+      .map(it => it.toLong).toList, t._2.split(",").map(it => it.toLong).toList, t._3.split(",").toList))
+      .distinct
+    return convoys
+  }
+
   def friendWriter(friends: List[(Long, Long)], writeFile: String): Unit = {
     val writer = new PrintWriter(new File(writeFile))
     friends.distinct.foreach { t =>
