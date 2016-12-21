@@ -28,8 +28,3 @@ class Location (id:Long,lat:Double,lon:Double,area:String,state:String,country:S
   }
 
 }
-class category{
-  val name:String=""
-  val subCategory=null
-
-}

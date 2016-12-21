@@ -29,6 +29,55 @@ class DataFormatter {
     //println ("agrain read ::"+stringToDate(stringDate))
     return stringDate
   }
+
+  def associateCatWithUserActsTS(userActsTSFile:String,checkinsWithCatFile:String,writeFile:String): Unit ={
+    val userActsTS=scala.io.Source.fromFile(userActsTSFile).getLines()
+      .map(t=> t.split("\t")).map(t=> (t(0),t(1).toLong,t(2).split(",").head,t(2).split(",").last))
+
+    val writer=new PrintWriter(new File(writeFile))
+    val fr=new fileReaderLBSN
+    val catChecks=fr.readCheckinsWithCats(checkinsWithCatFile)
+    println("check-ins are read")
+    val locsCats=catChecks.map(t=> (t._6,t._7)).distinct.toMap
+    val newUserActs:ListBuffer[(String,Long,String,String,String)]=new ListBuffer()
+    userActsTS.foreach{t=>
+      val cats=locsCats.getOrElse(t._2, "")
+      if(cats != ""){
+        newUserActs += ((t._1,t._2,cats,t._3,t._4))
+        writer.println(t._1+"\t"+t._2+"\t"+cats+"\t"+t._3+"\t"+t._4)
+      }
+    }
+    writer.close()
+
+  }
+
+
+
+  def associateCatWithGroupActs(groupActFile:String,checkinsWithCatFile:String, writeFile:String): Unit ={
+    val writer=new PrintWriter(new File(writeFile))
+    val fr=new fileReaderLBSN
+    val catChecks=fr.readCheckinsWithCats(checkinsWithCatFile)
+    println("check-ins are read")
+    //println(catChecks.head)
+    val locsCats=catChecks.map(t=> (t._6,t._7)).distinct.toMap
+    //.take(10).foreach(println)
+    val groupActs=scala.io.Source.fromFile(groupActFile).getLines()
+      .map(t=> t.split("\t")).map(t=> (t(0), t(1).toLong, t(2))).toList
+    val newGroupActs:ListBuffer[(String,Long,String,String)]=new ListBuffer()
+    groupActs.foreach{t=>
+      val cats=locsCats.getOrElse(t._2, "")
+      if(cats != ""){
+        newGroupActs += ((t._1,t._2,cats,t._3))
+        writer.println(t._1+"\t"+t._2+"\t"+cats+"\t"+t._3)
+      }
+    }
+    writer.close()
+    //newGroupActs.take(10).foreach(println)
+
+
+
+  }
+
   def associateCheckinId(checkins:List[(Long,Date,Double,Double,String,Long,String)]):
   List[(Long,Date,Double,Double,String,Long,String,Long)] ={
     //input={u,t,lat,lon,locStr,locId,Cats}

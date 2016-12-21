@@ -121,7 +121,7 @@ class ConvoyAnalysis_fsl_upd {
   def getConvoys(checkinsFile: String, infriendsFile: String, deltaTS: Long, writeFilePath: String): Unit = {
     //val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss")
     val timeUnit = (1000 * 60 ) // in minutes now //*24
-    val TSMap = getDataSnapShots(checkinsFile, infriendsFile, deltaTS * timeUnit, timeUnit) //Divide the data set into SnapShots on the basis of given time unit
+    val TSMap = getDataSnapShots(checkinsFile, deltaTS * timeUnit) //Divide the data set into SnapShots on the basis of given time unit
     println("Time Stamp Completed")
     println("Convoy mining started.")
     val writeFile = new PrintWriter(new File(writeFilePath))
@@ -131,19 +131,17 @@ class ConvoyAnalysis_fsl_upd {
     //val minConvoyDistinctLocSize = 2
 
     //writeFile.println("TSMAP size" + TSMap.size) //TSMAP=Array[(t1,t2),Hash[user,location]]
-    var convoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // all convoys
-    var currentConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // convoys that are currently progressing
+    //var convoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // all convoys
+    //var currentConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // convoys that are currently progressing
     //Convoy=List[(Users,VisitedLocations,TimeStamps)]
-    var loc: Long = 0L
-    val start = 0 //3390//0
-    val end = TSMap.size
+    //var loc: Long = 0L
+    //val start = 0 //3390//0
+    //val end = TSMap.size
     // initialize all data structures here to save memory
-
-    var addConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // all convoys
-    var delConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer()
-    var filteredConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer()
+    //var addConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer() // all convoys
+    //var delConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer()
+    //var filteredConvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] = new ListBuffer()
     var CC: ListBuffer[(ListBuffer[Long], Long, Long)] = new ListBuffer()
-
     // new algorithm
     var Vnext: ListBuffer[Convoy] = new ListBuffer[Convoy]() // temp
     var V: ListBuffer[Convoy] = new ListBuffer[Convoy]() // next Convoys
@@ -151,12 +149,10 @@ class ConvoyAnalysis_fsl_upd {
     var C: ListBuffer[Convoy] = new ListBuffer[Convoy]() // current convoy
     var newTimeStamp:ListBuffer[Long]=new ListBuffer()
     var newLocs:ListBuffer[Long]=new ListBuffer()
-
     var time: Long = -1
     var loopCheck = true
     val total=TSMap.size
     var count=0
-
     TSMap.foreach { ts => // time stamp: (startTime,EndTime), Hash(user, locs), TimeStampID
       count= count +1
       if(count%1==0)
@@ -250,7 +246,6 @@ class ConvoyAnalysis_fsl_upd {
       writeFile.println(c.getUsers().mkString(",")+"\t"+c.getLocations().mkString(",")+"\t"+c.getTimeStamps().mkString(","))
     }
     writeFile.close()
-
   }
   //testing
 
@@ -266,19 +261,20 @@ class ConvoyAnalysis_fsl_upd {
     }
 
   /** Divide the LBSN into timeStamps on the basis of given time unit */
-  def getDataSnapShots(checkinsFile: String, infriendsFile: String, deltaTS: Long, convertMSecTo: Long)
+  def getDataSnapShots(checkinsFile: String, deltaTS: Long)
   : Array[((Double, Double), scala.collection.mutable.HashMap[Long, Long], Long)] = {
     //val df:DateFormat=new SimpleDateFormat("yyyy-mm-dd:hh:mm:ss")
     val sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     // read check-ins from file
 
-    val ckLines = scala.io.Source.fromFile(checkinsFile).getLines().map(t => t.split("\t"))
+    val ckLines = scala.io.Source.fromFile(checkinsFile).getLines()//.take(10000)
+      .map(t => t.split("\t"))
       .map(t => (t(0).toLong, stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(1), t(1))).toList.distinct //.toArray
-    println("checkins size::"+ckLines.size)
+    println("check-ins size::"+ckLines.size)
     //ckLines = ckLines.filter(t => t._1 <= 3 && t._1 >0) // consider only these users
     //time unit to convert the visited time from millisecond to given unit
     //ckLines.sortBy(t=> t._2).foreach(t=> println(t._1,t._2,t._6))
-    val timeUnit = convertMSecTo //(1000 * 60 *60 ) // in hours now //*24
+    //val timeUnit = convertMSecTo //(1000 * 60 *60 ) // in hours now //*24
     val sortedByTime = ckLines.sortBy(t => t._2) //sort check-ins on the basis of time
     //println("minimum time::" + sortedByTime.head._8)
     //println("maximum time::" + sortedByTime.last._8)
@@ -289,9 +285,11 @@ class ConvoyAnalysis_fsl_upd {
     //println("Total time stamps::" + tsCount)
     println("Start Time :: " + sdf.format(sortedByTime.head._2.getTime))
     println("End Time :: " + sdf.format(sortedByTime.last._2.getTime))
+    println("array size is ::"+tsCount)
 
     val timeStampsMap: Array[((Double, Double), scala.collection.mutable.HashMap[Long, Long], Long)]
     = new Array[((Double, Double), scala.collection.mutable.HashMap[Long, Long], Long)](tsCount)
+
     // startTime,endTime, List[(user,location)]
     var startTime = minT
     var endTime = 0.0
@@ -380,5 +378,106 @@ class ConvoyAnalysis_fsl_upd {
     //timeStampsMap.foreach(t=> println(("check-ins::"+sdf.format(t._1._1),sdf.format(t._1._2)),t._2,t._3))
     //timeStampsMap=timeStampsMap.filter(t=> t._3>=32383 && t._3<=32529)
     return timeStampsMap // ={startTime,EndTime, Hash(user, locs), TimeStampID}
+  }
+
+  def findUserActivitiesTS(checkinsFile: String, deltaTS: Long, writeFile:String)
+  : Unit ={
+    val writer=new PrintWriter(new File(writeFile))
+    val minGroupSize=2
+    val groupActivities:ListBuffer[(Long,Long,Long)]= new ListBuffer() //user, location, time
+    val timeUnit = (1000 * 60 )
+    val timeSnaps=getDataSnapShots(checkinsFile,deltaTS * timeUnit)
+    timeSnaps.foreach{ts=>
+      //val timeStampActsA = ts._2.groupBy(t => t._1) //group by user .. each user has only one location
+        //.map(t =>  (t._1,t._2.map(it => it._2).to[ListBuffer], ts._3)).to[ListBuffer]
+      val timeStampActs= ts._2.toList.map(it=> (it._1,it._2,ts._3))
+        //.filter(t=> t._1.size>=minGroupSize)
+      //.map(t=> t.)
+      groupActivities ++= timeStampActs
+    }
+    println("total size is ::"+groupActivities.size)
+    val newGroups:ListBuffer[(Long,Long,ListBuffer[Long])]=new ListBuffer()
+    var timeList:ListBuffer[Long]=new ListBuffer()
+    var outerCount=0
+    groupActivities.groupBy(t=> t._1).foreach{gc=>
+      outerCount+=1
+      if(outerCount%100==0){
+        println("outerCount::"+outerCount)
+      }
+      //println("new one !! started")
+      timeList=new ListBuffer()
+      for(i:Int<-1 until gc._2.size){
+        if(i%10000==0){
+          println("inner count:: i, total::"+i,gc._2.size)
+        }
+
+        val previous=gc._2(i-1)
+        //println("previous::"+previous)
+        val newOne=gc._2(i)
+        //println("new one:;"+newOne)
+        if(newOne._2==previous._2 && newOne._1==previous._1 && newOne._3==(previous._3+1)){ //loc=loc, user=user,time=time+1
+          timeList += previous._3
+          //println("not inserted")
+        }else{
+          timeList +=previous._3
+          newGroups += ((previous._1,previous._2,timeList))
+          //println("inserted ::"+previous)
+          //println("with time stamps::"+timeList)
+          timeList=new ListBuffer()
+        }
+      }
+    }
+    println("new user check-ins size::"+newGroups.size)
+    newGroups.foreach{g=>
+      writer.println(g._1+"\t"+g._2+"\t"+g._3.mkString(","))
+    }
+    writer.close()
+
+  }
+
+  def findGroupActivities(checkinsFile: String, deltaTS: Long, writeFile:String)
+  : Unit ={
+    val writer=new PrintWriter(new File(writeFile))
+    val minGroupSize=2
+    val groupActivities:ListBuffer[(ListBuffer[Long],Long,Long)]= new ListBuffer()
+    val timeUnit = (1000 * 60 )
+    val timeSnaps=getDataSnapShots(checkinsFile,deltaTS * timeUnit)
+    timeSnaps.foreach{ts=>
+      val timeStampGroups = ts._2.groupBy(t => t._2)
+        .map(t =>  (t._2.map(it => it._1).to[ListBuffer], t._1, ts._3)).to[ListBuffer]
+        .filter(t=> t._1.size>=minGroupSize)
+        //.map(t=> t.)
+      groupActivities ++= timeStampGroups
+    }
+    println("total size is ::"+groupActivities.size)
+    val newGroups:ListBuffer[(ListBuffer[Long],Long,ListBuffer[Long])]=new ListBuffer()
+    var timeList:ListBuffer[Long]=new ListBuffer()
+    groupActivities.groupBy(t=> t._1).foreach{gc=>
+      //println("new one !! started")
+      timeList=new ListBuffer()
+      for(i:Int<-1 until gc._2.size){
+
+        val previous=gc._2(i-1)
+        //println("previous::"+previous)
+        val newOne=gc._2(i)
+        //println("new one:;"+newOne)
+        if(newOne._2==previous._2 && newOne._1==previous._1 && newOne._3==(previous._3+1)){
+          timeList += previous._3
+          //println("not inserted")
+        }else{
+          timeList +=previous._3
+          newGroups += ((previous._1,previous._2,timeList))
+          //println("inserted ::"+previous)
+          //println("with time stamps::"+timeList)
+          timeList=new ListBuffer()
+        }
+    }
+    }
+    println("new Group size::"+newGroups.size)
+    newGroups.foreach{g=>
+      writer.println(g._1.mkString(",")+"\t"+g._2+"\t"+g._3.mkString(","))
+    }
+    writer.close()
+
   }
 }

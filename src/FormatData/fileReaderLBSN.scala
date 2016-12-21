@@ -50,7 +50,7 @@ class fileReaderLBSN {
   def readCheckinsWithCats(checkinWithCatsFile:String): List[(Long, Date, Double, Double, String, Long, String)] ={
     // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
     val df = new DataFormatter // data formatter object
-    val checkins = scala.io.Source.fromFile(checkinWithCatsFile).getLines()
+    val checkins = scala.io.Source.fromFile(checkinWithCatsFile).getLines()//.take(100)
         .map(t => t.split("\t"))
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(6)))
         .toList.distinct

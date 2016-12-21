@@ -148,6 +148,175 @@ class Evaluation {
 
   }
 
+  def findMeasurement2(userActsCatsTSFile:String,groupActsCatsTSFile:String,friendsFile:String,inCat:List[String]): Unit ={
+    val userActsTS=scala.io.Source.fromFile(userActsCatsTSFile).getLines()
+      .map(t=> t.split("\t"))
+      .map(t=> (ListBuffer(t(0).toLong),t(1).toLong,t(2).split(",").to[ListBuffer],(t(3),t(4)))).to[ListBuffer]
+    //.take(10).foreach(t=> println(t))
+    println("user ats size ::"+userActsTS.size)
+    println("now group")
+    val groupActsTS=scala.io.Source.fromFile(groupActsCatsTSFile).getLines()
+      .map(t=> t.split("\t"))
+      .map(t=> (t(0).split(",").map(it=> it.toLong).to[ListBuffer],t(1).toLong, t(2).split(",").to[ListBuffer],(t(3).split(",").head,t(3).split(",").last))).to[ListBuffer]
+      //.take(10).foreach(t=> println(t))
+    println("group size::"+groupActsTS.size)
+    //val totalActsTS=userActsTS ++ groupActsTS
+    val usersActsMap=userActsTS.groupBy(t=> t._1)
+    println("user map size ::"+usersActsMap.size)
+    val groupActsMap=groupActsTS.groupBy(t=> t._1)
+    println(" Group size is ::"+ groupActsMap.size)
+
+
+    val allCats:ListBuffer[String]=new ListBuffer()
+    //get map on categories
+    val catSplitTotalActsTS:ListBuffer[(ListBuffer[Long],Long,ListBuffer[String],(String,String),String)]=new ListBuffer()
+    userActsTS.foreach{t=>
+      val cats=t._3
+      cats.foreach{c=>
+        allCats += c
+        if(c!="n\\a")
+        catSplitTotalActsTS += ((t._1,t._2,t._3,t._4,c))
+      }
+    }
+    val catActsMap=catSplitTotalActsTS.groupBy(t=> t._5)
+    println("cat map size ::"+catActsMap.size)
+    println("all cats size ::"+allCats.distinct.size)
+    val tripCatActsMap=catActsMap.filter(t=> inCat.contains(t._1))
+    println("new map size::"+tripCatActsMap.size)
+
+    // no new addition in the map: individual and group activities can be send separately as they have redundant activities
+    // for every new group have to match for all the superset of this new potential group: that will be the activities of this
+
+  }
+
+  def findCombinedAffinityOfGroup(headGroup:(ListBuffer[Long],Double),currentPair:(Long,Double)): (ListBuffer[Long],Double) ={
+    //val newGroup= (headGroup._1 :+ currentPair._1)
+    val result= (headGroup._1 :+ currentPair._1, headGroup._2+currentPair._2)
+    return result
+
+  }
+
+  def findGroupCohTripCat(headGroup:ListBuffer[Long],cUser:Long, inCats:ListBuffer[String],
+                          allGroupActs:ListBuffer[(ListBuffer[Long],Long,ListBuffer[String])],
+                          userActsMap:Map[Long,ListBuffer[(Long,ListBuffer[String])]]): Unit = {
+
+    val pGroup = headGroup :+ cUser
+    inCats.foreach { c =>
+    // should be for each category
+    val pGroupActs = allGroupActs.filter { t =>
+      t._3.contains(c) &&
+        pGroup.forall(t._1.contains)
+    }
+    val totalIndActs: ListBuffer[(Long, ListBuffer[String])] = new ListBuffer()
+    pGroup.foreach { t =>
+      if (userActsMap.contains(t)) {
+        val acts = userActsMap.getOrElse(t, ListBuffer()) .filter(t=> inCats.forall(t._2.contains))
+        totalIndActs ++= acts
+      }
+    }
+    val score = pGroupActs.size.toDouble / totalIndActs.size.toDouble
+    println("group is ::" + pGroup + " score all categories is ::" + score)
+  }
+
+
+
+  }
+
+  def findGroupCohAllCat(headGroup:ListBuffer[Long],cUser:Long, inCats:ListBuffer[String],
+                         allGroupActs:ListBuffer[(ListBuffer[Long],Long,ListBuffer[String])],
+                         userActsMap:Map[Long,ListBuffer[(Long,ListBuffer[String])]]): Unit ={
+    val pGroup= headGroup :+ cUser
+    // should be for each category
+    val pGroupActs=allGroupActs.filter{t=>
+      //inCats.forall(t._3.contains) &&
+      pGroup.forall(t._1.contains)
+    }
+    val totalIndActs:ListBuffer[(Long,ListBuffer[String])]=new ListBuffer()
+    pGroup.foreach{t=>
+      if(userActsMap.contains(t)){
+        val acts=userActsMap.getOrElse(t,ListBuffer())//.filter(t=> inCats.forall(t._2.contains))
+        totalIndActs ++= acts
+      }
+    }
+    val score=pGroupActs.size.toDouble/totalIndActs.size.toDouble
+
+    println("group is ::"+pGroup +" score all categories is ::"+score)
+
+
+  }
+
+  def findMeasurement(userScoreFile: String, k: Int, friendsFile: String): Unit ={
+    val userScorePair = scala.io.Source.fromFile(userScoreFile).getLines().toList
+      .map(t => t.split("\t")).map(t => (t(0).toLong, t(1).toDouble))//.sortBy(t => -t._2)
+    val userScoreMap=userScorePair.toMap
+    val fr = new fileReaderLBSN
+    val friendsMap = fr.readFriendsFile(friendsFile).groupBy(t => t._1).map(t => (t._1, t._2.map(it => it._2)))
+    var GroupScoreList:ListBuffer[(ListBuffer[Long],Double)]=new ListBuffer()
+    //val candidateUsersScore=userScorePair
+    val firstMax=userScorePair.maxBy(t=> t._2) // first max
+    var currentGroupPair=(ListBuffer(firstMax._1),firstMax._2) // first as
+    /***/
+    //sort first list on the basis of score
+    //userScorePair.take(10).foreach(println)
+    for (i: Int <- 1 to k) {
+      val currentGroupUsers=currentGroupPair._1
+      println("value of iteration is::"+i)
+      // there might not be a group of k users
+      println("at k ="+ i +" current pair is::"+currentGroupPair)
+      println("values of each of member is ::")
+      currentGroupPair._1.foreach{t=>
+        println("for user::"+t+" value is::"+userScoreMap.getOrElse(t,null))
+      }
+      if (currentGroupUsers.size < i ) {
+        println("no more increase in group size")
+      } else {
+        GroupScoreList=new ListBuffer()
+        for (j: Int <- 0 until userScorePair.size) {
+            val currentPair=userScorePair(j)
+            val cUser = currentPair._1
+            if (!currentGroupUsers.contains(cUser)) {
+              // if group doesn't already contain this element
+              // check if the whole group is friend with this member:cUser
+              var groupFriend = true
+              currentGroupUsers.foreach { t =>
+                if (!friendsMap.getOrElse(t, null).contains(cUser)) {
+                  groupFriend = false
+                }
+              }
+              if (groupFriend) {
+                //store values of each pair for new group
+                // filter friends - done
+                // find cohesiveness on all the categories
+                val newPairScore=findCombinedAffinityOfGroup(currentGroupPair,currentPair)
+                //val newPairScore= findCombinedAffinityAllCat()
+                //val pairOnTripCats=
+                GroupScoreList += newPairScore
+                // find cohesiveness on trip categories
+              }
+              /*var groupFriend = true
+              headGroup.foreach { t =>
+                if (!friends.getOrElse(t, null).contains(cUser)) {
+                  groupFriend = false
+                }
+              }
+              if (groupFriend) {
+                //if whole group is friend
+                //head +=
+                val newHead: ListBuffer[Long] = currentPair._1
+                newHead += cUser
+                currentPair = ((newHead, currentPair._2 + userScorePair(j)._2))
+                loopContinue = false
+              }*/
+            }
+        }
+        //make new group head
+        if(GroupScoreList.size>0)
+        currentGroupPair=GroupScoreList.maxBy(t=> t._2)
+      }
+    }
+    println("final group is ::"+currentGroupPair)
+  }
+
   def findTogetherTravelScore(inPair:(List[Long],Long),inCheckins:List[(Long,Date,Double,Double,String,Long,String)]
                               ,inConvoys:List[(List[Long],List[Long],List[String])]): Unit ={
     val inGroup= inPair._2 :: inPair._1
@@ -172,7 +341,6 @@ class Evaluation {
     }
 
   }
-
 
   def evaluateGroup(inGroup: List[Long], inCat: List[String], convoysTableFile: String): Unit = {
     val cpa = new ConvoysPatternAnalysis
@@ -202,7 +370,6 @@ class Evaluation {
 
   }
 
-
   def getCheckinsOfUser(checkins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)], user: Long)
   : ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)] = {
     val newCheckins = checkins.filter { t =>
@@ -228,8 +395,7 @@ class Evaluation {
   }
 
   def getCatScore(checkins: ListBuffer[(Long, Date, Double, Double, String, Long, String, Long, String)]
-                  , inputCat: List[String], catScorefile: String)
-  : Unit = {
+                  , inputCat: List[String], catScorefile: String): Unit = {
     val lambada = 0.5
     val users = checkins.map(t => t._1).distinct
     val catScoreWriter = new PrintWriter(new File(catScorefile))
