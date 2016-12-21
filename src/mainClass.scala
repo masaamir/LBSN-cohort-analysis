@@ -77,6 +77,7 @@ object mainClass {
         //convoyPattern.getConvoyTable(weeConvoys,weeFriendsFile,weeVenues,weeConvoyTableFile)
       }
     }
+    //test
 */
     /** Clustered Data to Convoys*/
     println("**Finding Convoys**")
