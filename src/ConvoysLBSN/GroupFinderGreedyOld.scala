@@ -9,7 +9,8 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by aamir on 23/12/16.
   */
-class GroupFinderGreedy {
+class GroupFinderGreedyOld {
+
 
   //read file into List[(user, location, List[cat], (startTime,endTime))]
   def findUserActs(userActsCatsTSFile:String)
@@ -322,13 +323,13 @@ class GroupFinderGreedy {
                            inAlpha:Double,
                            inMu:Double,
                            users:ListBuffer[Long]
-                          ): Unit ={
+                          ): Double ={
 
     var groupAffinityScore:Double=0.0
     users.foreach{u=>
       groupAffinityScore += affinity.getOrElse(u,0.0)
-      println("user is:;"+u)
-      println("affinity now is::"+groupAffinityScore)
+      //println("user is:;"+u)
+      //println("affinity now is::"+groupAffinityScore)
     }
     println("total affinity score is ::"+groupAffinityScore)
     var cohScore:Double=0.0
@@ -338,6 +339,63 @@ class GroupFinderGreedy {
     }
     val totalScore=inMu*groupAffinityScore + (1-inMu)*cohScore
     println("total group score is::"+totalScore)
+    return totalScore
+
+  }
+
+  def choose(n:Long, k:Long): Long ={
+    if(k==0) return 1
+    return ((n * choose(n-1,k-1))/k)
+  }
+
+  def findBestGroupGreedy(
+                          affinity:Map[Long,Double],
+                          inUserActsMap:Map[Long, ListBuffer[(Long, Long, ListBuffer[String], (String, String))]],
+                          inUserCatsActsMap:Map[(Long,String), ListBuffer[(Long, Long, ListBuffer[String], (String, String))]],
+                          inPairActs:Map[(Long,Long),ListBuffer[((Long,Long),Long,ListBuffer[String],(String,String))]],
+                          inPairCatsActs:Map[((Long,Long),String),ListBuffer[(((Long,Long),String),Long,ListBuffer[String],(String,String))]],
+                          inCats:List[String],
+                          inAlpha:Double,
+                          inMu:Double,
+                          inUserGroup:ListBuffer[Long]
+                         ): Unit ={ //Using maximal cliques plus surplus
+    // receive group of users and return a subset that is the best in terms of surplus
+    var maxSurplus= findGroupTravelScore(affinity,inUserActsMap,inUserCatsActsMap,inPairActs
+      ,inPairCatsActs,inCats,inAlpha,inMu,inUserGroup) - 0.1* choose(inUserGroup.size,2).toDouble
+    var runGroup=new ListBuffer[Long]()
+    runGroup=inUserGroup.clone()
+    var i= 0
+    while(i<runGroup.size ){
+      val u=runGroup(i)
+      println("runGroup is ::"+runGroup)
+      println("user is ::"+u)
+      val newInnerGroup=runGroup - u
+      // do check the surplus here
+      val currentSurplus=findGroupTravelScore(affinity,inUserActsMap,inUserCatsActsMap,inPairActs
+        ,inPairCatsActs,inCats,inAlpha,inMu,newInnerGroup) - choose(newInnerGroup.size,2).toDouble
+      println("------current vs. max::"+currentSurplus,maxSurplus)
+      if(currentSurplus>maxSurplus){
+        println("group changed !!")
+        maxSurplus=currentSurplus
+        runGroup=newInnerGroup.clone()
+        println("group changed to !!"+runGroup )
+        i = 0
+      }
+      i += 1
+    }
+    /*runGroup.foreach{u=>
+      println("runGroup is ::"+runGroup)
+      println("user is ::"+u)
+      val newInnerGroup=runGroup - u
+      if(newInnerGroup.contains(3)){
+        println("group changed !!")
+        runGroup=newInnerGroup.clone()
+        println("group changed to !!"+runGroup )
+      }
+
+    }*/
+
+    println("group and surplus is ::",runGroup,maxSurplus)
 
   }
 
@@ -369,9 +427,10 @@ class GroupFinderGreedy {
 
     val alpha:Double=0.5
     val mu:Double=0.5
-    val usersGroup:ListBuffer[Long]=ListBuffer(9683,6181,1718,1448)
+    val usersGroup:ListBuffer[Long]=ListBuffer(9683,6181,1718)
     val pairStartTime=System.nanoTime()
-    findGroupTravelScore(userScorePair,userActsMap,userCatActMap,pairActsMap,pairCatsActsMap,inCat,alpha,mu,usersGroup)
+    findBestGroupGreedy(userScorePair,userActsMap,userCatActMap,pairActsMap,pairCatsActsMap,inCat,alpha,mu,usersGroup)
+    //findGroupTravelScore(userScorePair,userActsMap,userCatActMap,pairActsMap,pairCatsActsMap,inCat,alpha,mu,usersGroup)
     //findPairCohesiveness(userActsMap,userCatActMap,pairActsMap,pairCatsActsMap,inCat,alpha,(9683,6181))
     println("pair time is::"+(System.nanoTime()- pairStartTime))
     //findPairEdgesInGroup(usersGroup)
