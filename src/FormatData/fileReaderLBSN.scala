@@ -101,6 +101,29 @@ return newVenues.distinct
       .toList.distinct
     return friends
   }
+  def readConvoysFile(convoysFile: String): ListBuffer[(ListBuffer[Long], ListBuffer[Long],ListBuffer[Long])] = {
+    val convoys=scala.io.Source.fromFile(convoysFile).getLines()
+      .map(t=> t.split("\t")).map(t=> (t(0).split(","),t(1).split(","),t(2).split(",")))
+      .map(t=> (t._1.map(it=> it.toLong).sortBy(t=> t).to[ListBuffer],t._2.map(it=> it.toLong).sortBy(t=> t).to[ListBuffer],ListBuffer(t._3.head.toLong,t._3.last.toLong))).to[ListBuffer]
+    return convoys
+  }
+
+  /**read convoys file with categories: file: Users,Locations, Combined distinct categories, (startTime,endTime)*/
+  def readConvoyCatsFile(convoyCatFile:String): ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[String],(Long,Long))] ={
+    val convoysCat=scala.io.Source.fromFile(convoyCatFile).getLines()
+      .map(t=> t.split("\t")).map(t=> (t(0).split(","),t(1).split(","),t(2).split(","),t(3).split(","))) //Users,Locs,Cats, (ts,te)
+      .map(t=> (t._1.map(it=> it.toLong).sortBy(t=> t).to[ListBuffer],t._2.map(it=> it.toLong).sortBy(t=> t).to[ListBuffer],t._3.map(it=> it).to[ListBuffer],(t._4.head.toLong,t._4.last.toLong))).to[ListBuffer]
+    //convoysCat.take(10).foreach(println)
+    return convoysCat
+  }
+
+  def readConvoyCatsFileTemp(convoyCatFile:String): ListBuffer[(ListBuffer[Long],ListBuffer[Long],(Long,Long))] ={
+    val convoysCat=scala.io.Source.fromFile(convoyCatFile).getLines()
+      .map(t=> t.split("\t")).map(t=> (t(0).split(","),t(1).split(","),t(2).split(","))) //Users,Locs,Cats, (ts,te)
+      .map(t=> (t._1.map(it=> it.toLong).sortBy(t=> t).to[ListBuffer],t._2.map(it=> it.toLong).sortBy(t=> t).to[ListBuffer],(t._3.head.toLong,t._3.last.toLong))).to[ListBuffer]
+    //convoysCat.take(10).foreach(println)
+    return convoysCat
+  }
 
   def readConvoyTableFile(convoyTableFile:String): List[(List[Long],List[Long],List[String])] ={
     val convoys = scala.io.Source.fromFile(convoyTableFile).getLines().drop(1).toList

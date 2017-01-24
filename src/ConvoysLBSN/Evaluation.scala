@@ -357,8 +357,6 @@ class Evaluation {
     println("filtered Convoys size ::" + contConvoys.size)
     //println("these convoys are ::")
     //contConvoys.foreach(t=> println(t))
-
-
     /*
     println("contained convoys are below ::")
     convoys.filter(t=> t._1.contains(9345))// && t._1.contains(9345))

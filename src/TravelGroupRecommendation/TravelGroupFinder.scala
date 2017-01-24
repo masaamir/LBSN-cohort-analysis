@@ -34,7 +34,8 @@ class TravelGroupFinder {
   }
 
   var currentGroup:ListBuffer[Long]=new ListBuffer[Long]()
-  var currentSurplus=0.0
+  var currentSurplus=Double.NegativeInfinity
+  var selectedGroup:(ListBuffer[Long],Double)=null
 
   def Expand(SUBG:ListBuffer[Long],CAND:ListBuffer[Long],friends:Map[Long,ListBuffer[Long]],Q:ListBuffer[Long]): Unit ={
     //println("------------------------EXPAND----------------------")
@@ -50,12 +51,20 @@ class TravelGroupFinder {
       // compute travel score
       /**compute Travel Score*/
 
-      val groupNSurplus=gfg.findBestGroupGreedy(gfg.userScorePair,gfg.userActsMap,gfg.userCatActMap,gfg.pairActsMap,gfg.pairCatsActsMap,
+      var groupNSurplus:(ListBuffer[Long],Double)=gfg.findBestGroupGreedy(gfg.userScorePair,gfg.userActsMap,gfg.userCatActMap,
+        gfg.pairActsMap,gfg.pairCatsActsMap,
         gfg.cats,gfg.alpha,gfg.mu,gfg.surplusAlpha,inQ)
+      /*if(inQ.contains(6802) && inQ.contains(13553)){
+        println("required group n Surplus::"+groupNSurplus)
+      }*/
+      if(groupNSurplus._2==0.0){
+        groupNSurplus=(groupNSurplus._1,Double.NegativeInfinity)
+      }
       if(groupNSurplus._2> currentSurplus) {
         currentGroup = groupNSurplus._1
         currentSurplus = groupNSurplus._2
-        println(" Changed:: group,surplus::",groupNSurplus)
+        //println(" Changed:: group,surplus::",groupNSurplus)
+        selectedGroup=groupNSurplus
       }
     }
     else {
@@ -85,10 +94,11 @@ class TravelGroupFinder {
           //println("newTest is ::"+newTest)
           if(maxPossibleSurplus(potentialGroup) < currentSurplus){ // replace sum with maximum possible surplus of the group bound here !!!
             //subgq.clear()// new ListBuffer[Long]() // even no need
-            if((inQ:+q).distinct.size>1)
-            println("restricted !!!!! "+(inQ :+q).distinct)
-            //inQ.clear()
-            //println("NEW subgroup and queue should be empty it is::"+subgq,inQ)
+            if((inQ:+q).distinct.size>1) {
+              //println("restricted !!!!! "+(inQ :+q).distinct) /** record restricted pairs here*/
+              //inQ.clear()
+              //println("NEW subgroup and queue should be empty it is::"+subgq,inQ)
+            }
           }
           //println("Q before expanding is::"+inQ)
           else // expand for only those elements which have potential to be clique
@@ -118,13 +128,20 @@ class TravelGroupFinder {
     Expand(users,users,friends,Q) //subg,cand, Q
   }*/
 var gfg=new GroupFinderGreedy
-  def runnerTravelGroup(userActsCatsTSFile:String,
-             groupActsCatsTSFile:String,friendsFile:String,inCat:List[String],inLambda:Double,inAlpha:Double,inMu:Double,inSurplusAlpha:Double)
-  : Unit ={
-
-    val usersGroup:ListBuffer[Long]=ListBuffer(9683,6181,1718)
+  def runnerTravelGroup(userActsCatsTSFile:String,groupActsCatsTSFile:String, ConvoysPairUserPairSeqLoc:String,
+                        friendsFile:String,inCat:List[String],inLambda:Double,inAlpha:Double,inMu:Double,inEta:Double,inSurplusAlpha:Double,
+                        globalAff:Boolean,localAff:Boolean,globalCoh:Boolean,catCoh:Boolean,globalSeqCoh:Boolean,catSeqCoh:Boolean)
+  : (ListBuffer[Long],Double) ={
+    //val usersGroup:ListBuffer[Long]=ListBuffer(9683,6181,1718)
     //val gfg=new GroupFinderGreedy
-    gfg.runner(userActsCatsTSFile,groupActsCatsTSFile,friendsFile,inCat,inLambda,inAlpha,inMu,inSurplusAlpha)
+    /**initialize values*/
+    currentGroup=new ListBuffer[Long]()
+    currentSurplus=Double.NegativeInfinity
+    selectedGroup=null
+
+
+    gfg.runner(userActsCatsTSFile,groupActsCatsTSFile,ConvoysPairUserPairSeqLoc,friendsFile,inCat,inLambda,inAlpha,inMu,inEta,
+      inSurplusAlpha,globalAff,localAff,globalCoh,catCoh,globalSeqCoh,catSeqCoh)
     /*val group=gfg.findBestGroupGreedy(gfg.userScorePair,gfg.userActsMap,gfg.userCatActMap,gfg.pairActsMap,gfg.pairCatsActsMap,
       gfg.cats,gfg.alpha,gfg.mu,usersGroup)*/
 
@@ -135,6 +152,7 @@ var gfg=new GroupFinderGreedy
     val Q:ListBuffer[Long]=new ListBuffer[Long]()
 
     Expand(users,users,friends,Q)
+    return selectedGroup
 
   }
 

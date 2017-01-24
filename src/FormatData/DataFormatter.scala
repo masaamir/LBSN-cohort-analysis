@@ -32,21 +32,30 @@ class DataFormatter {
 
   def associateCatWithUserActsTS(userActsTSFile:String,checkinsWithCatFile:String,writeFile:String): Unit ={
     val userActsTS=scala.io.Source.fromFile(userActsTSFile).getLines()
-      .map(t=> t.split("\t")).map(t=> (t(0),t(1).toLong,t(2).split(",").head,t(2).split(",").last))
+      .map(t=> t.split("\t")).map(t=> (t(0),t(1).toLong,t(2).split(",").head,t(2).split(",").last)).toList
+      //.filter(t=> t._1=="12108"|| t._1=="4339")
+    //println("user activities are::")
+    //userActsTS.foreach(println)
 
     val writer=new PrintWriter(new File(writeFile))
     val fr=new fileReaderLBSN
     val catChecks=fr.readCheckinsWithCats(checkinsWithCatFile)
-    println("check-ins are read")
+    //println("check-ins are read")
+    //println("size is ::"+catChecks.size)
     val locsCats=catChecks.map(t=> (t._6,t._7)).distinct.toMap
+    //locsCats.take(10).foreach(println)
     val newUserActs:ListBuffer[(String,Long,String,String,String)]=new ListBuffer()
+    //println("user Acts once again size::")
     userActsTS.foreach{t=>
+
       val cats=locsCats.getOrElse(t._2, "")
+      //println("for t, cat value is ::"+t._2, cats)
       if(cats != ""){
         newUserActs += ((t._1,t._2,cats,t._3,t._4))
         writer.println(t._1+"\t"+t._2+"\t"+cats+"\t"+t._3+"\t"+t._4)
       }
     }
+    println("new user acts are ::"+newUserActs.size)
     writer.close()
 
   }
@@ -66,6 +75,7 @@ class DataFormatter {
     val newGroupActs:ListBuffer[(String,Long,String,String)]=new ListBuffer()
     groupActs.foreach{t=>
       val cats=locsCats.getOrElse(t._2, "")
+
       if(cats != ""){
         newGroupActs += ((t._1,t._2,cats,t._3))
         writer.println(t._1+"\t"+t._2+"\t"+cats+"\t"+t._3)
@@ -74,7 +84,48 @@ class DataFormatter {
     writer.close()
     //newGroupActs.take(10).foreach(println)
 
+  }
 
+  def getPairUserWSeqActsConvoys(convoysFile:String, fileToWrite:String): ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long])] ={
+
+    val fileWriter=new PrintWriter(new File(fileToWrite))
+    val fr=new fileReaderLBSN
+
+    val convoysWithSeqActs=getConvoysWithSequentialActs(convoysFile)
+    val convoysPairUsersWSeqActs=new ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long])]()
+    var groupUsers:ListBuffer[Long]=new ListBuffer[Long]()
+    convoysWithSeqActs.foreach{c=>
+      groupUsers=c._1.sortBy(t=> t)
+      //groupUsers=ListBuffer(1,2,3,4,5)
+      for(i<-0 until groupUsers.size-1){
+        for(j<- (i+1) until groupUsers.size){
+          convoysPairUsersWSeqActs += ((ListBuffer(groupUsers(i),groupUsers(j)),c._2,c._3))
+          fileWriter.println(groupUsers(i)+","+groupUsers(j)+"\t"+c._2.mkString(",")+"\t"+c._3.mkString(","))
+          //println(groupUsers(i),groupUsers(j))
+        }
+      }
+    }
+    fileWriter.close()
+
+    //println("wrong Convoys are::"+convoysPairUsersWSeqActs.size)
+    //convoysPairUsersWSeqActs.filter(t=> t._1.size>2).foreach(println)
+    return convoysPairUsersWSeqActs
+
+  }
+
+  def getConvoysWithSequentialActs(convoyFile:String): ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long])] ={
+    val fr=new fileReaderLBSN
+    val convoysOriginal=fr.readConvoysFile(convoyFile)
+    val seqLocConvoys=ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long])]()
+    var locs:ListBuffer[Long]=new ListBuffer[Long]()
+    convoysOriginal.foreach{c=>
+      locs=c._2
+      for(i<-0 until locs.size-1){
+        seqLocConvoys += ((c._1,ListBuffer(locs(i),locs(i+1)),c._3))
+      }
+    }
+    //seqLocConvoys.take(20).foreach(println)
+    return seqLocConvoys
 
   }
 
@@ -135,6 +186,35 @@ class DataFormatter {
     println("cat count is::"+catCount)
     //splitCheckins.take(100).foreach(println)
     return splitCheckins
+  }
+  def getConvoysWithCatsPairs(catCheckinsFile:String,convoysFile:String, catConvoysFile:String): Unit ={
+    val fr=new fileReaderLBSN
+    val catConvoyWriter=new PrintWriter(new File(catConvoysFile))
+    val catCheckins=fr.readCheckinsWithCats(catCheckinsFile)
+    val locCatMap= catCheckins.map(t=> (t._6,t._7.split(",").toList)).distinct.toMap
+    val newConvoys:ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[String], (Long,Long))]=new ListBuffer()
+    val convoys=fr.readConvoysFile(convoysFile)
+    var cats:ListBuffer[String]=new ListBuffer()
+    var groupLocs:ListBuffer[Long]=new ListBuffer[Long]()
+    convoys.foreach{c=>
+      cats=new ListBuffer[String]()
+      groupLocs=c._2
+      groupLocs.foreach{loc=>
+        if(locCatMap.contains(loc)){
+          cats ++= locCatMap.getOrElse(loc,null)
+        }
+      }
+      cats = cats.filter(t=> t!= "n\\a")
+      cats=cats.distinct
+      /*if(cats.size< cats.distinct.size){
+        println("yes difference is there::"+cats, cats.distinct)
+      }*/
+      //newConvoys += ((c._1,c._2,cats.distinct,c._3))
+      catConvoyWriter.println(c._1.mkString(",")+"\t"+c._2.mkString(",")+"\t"+cats.distinct.mkString(",")+"\t"+c._3.mkString(","))
+    }
+    //println("function finished")
+    catConvoyWriter.close()
+
   }
 
   def getCheckinsWithCategories(fileCheckins:String,fileVenues:String, fileWriteCheckWithCat:String): Unit ={
