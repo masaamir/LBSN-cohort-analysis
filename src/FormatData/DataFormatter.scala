@@ -147,18 +147,20 @@ class DataFormatter {
     val writer=new PrintWriter(new File(writeConvoysWithCat))
     val convoys=cpa.readConvoysFile(convoysFile)
     val venues=fr.readVenuesFileWee(venuesFile)
+
     val venueMap=venues.map(t=> (t.lId,t.lCategories)).toMap
     var cats:ListBuffer[String]=new ListBuffer()
     val newConvoys=convoys.map{c=>
       cats=new ListBuffer()
-      c._1.foreach{l=>
+      c._2.foreach{l=>
         if(venueMap.contains(l))
         cats ++= venueMap.getOrElse(l,ListBuffer("n\\a"))
+        //else println(" not found")
       }
       (c._1,c._2,c._3,cats)
     }
     newConvoys.foreach{c=>
-      writer.println(c._1.mkString(",")+"\t"+c._2.mkString(",")+"\t"+c._3.mkString(",")+"\t"+c._4.mkString(","))
+      writer.println(c._1.mkString(",")+"\t"+c._2.mkString(",")+"\t"+c._4.mkString(",")+"\t"+c._3.head+","+c._3.last)
     }
     writer.close
   }
@@ -220,8 +222,6 @@ class DataFormatter {
   def getCheckinsWithCategories(fileCheckins:String,fileVenues:String, fileWriteCheckWithCat:String): Unit ={
     val fr=new fileReaderLBSN
     val checkins=fr.readCheckinFileNew(fileCheckins)
-    //checkins=checkins.filter(t=> t._1==23).sortBy(t=> t._2).take(10)
-      //checkins.foreach(println)
     val venues=fr.readVenuesFileWee(fileVenues)
     val writer=new PrintWriter(new File(fileWriteCheckWithCat))
     val lCatMap=venues.map(t=> (t.lId,t.lCategories)).toMap

@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by aamir on 23/12/16.
   */
-class GroupFinderGreedy {
+class GroupFinderGreedyOld {
 
 
   //read file into List[(user, location, List[cat], (startTime,endTime))]
@@ -264,8 +264,7 @@ class GroupFinderGreedy {
     if(inGlobalSeqCoh){
       //println("local cohesiveness sequential for all cats")
       if (pairSeqActsMap.contains(pairUser)) {
-        //cohSeqAll = pairSeqActsMap.getOrElse(pairUser, null).size.toDouble / (inUserActsMap.getOrElse(pairUser._1, null).size + inUserActsMap.getOrElse(pairUser._2, null).size).toDouble
-        cohSeqAll = pairSeqActsMap.getOrElse(pairUser, null).size.toDouble / maxSeqActsByAnyPair.toDouble
+        cohSeqAll = pairSeqActsMap.getOrElse(pairUser, null).size.toDouble / (inUserActsMap.getOrElse(pairUser._1, null).size + inUserActsMap.getOrElse(pairUser._2, null).size).toDouble
       }
     }
     /** cohesiveness for sequential activities for input categories*/
@@ -365,7 +364,7 @@ class GroupFinderGreedy {
   }
 
   def findPairEdgesInGroup(inUsers:ListBuffer[Long]): ListBuffer[(Long,Long)] ={
-    val users=inUsers.sortBy(t=> t)
+    val users=inUsers.sortBy(t=> -t)
     val i,j=0
     val edges:ListBuffer[(Long,Long)]=new ListBuffer[(Long, Long)]()
     for(i<-0 until users.length){
@@ -390,25 +389,23 @@ class GroupFinderGreedy {
                           ): Double ={
 
     var groupAffinityScore:Double=0.0
-    if(inGlobalAff && inLocalAff) {
-      users.foreach { u =>
-        groupAffinityScore += affinity.getOrElse(u, 0.0)
-        //println("user is:;"+u)
-        //println("affinity now is::"+groupAffinityScore)
-      }
+    users.foreach{u=>
+      groupAffinityScore += affinity.getOrElse(u,0.0)
+      //println("user is:;"+u)
+      //println("affinity now is::"+groupAffinityScore)
     }
     //println("total affinity score is ::"+groupAffinityScore)
     var cohScore:Double=0.0
     val pairs=findPairEdgesInGroup(users)
     pairs.foreach{p=>
+
       cohScore += findPairCohesiveness(inUserActsMap,inUserCatsActsMap,inPairActs,inPairCatsActs,inCats,inAlpha,p)
       /*if((p._1==6802 && p._2==13553) || (p._1==13553 && p._2==6802)){
         println("required group n Surplus::"+cohScore)
       }*/
     }
-    var totalScore=inMu*groupAffinityScore + (1-inMu)*cohScore
+    val totalScore=inMu*groupAffinityScore + (1-inMu)*cohScore
     //println("total group score is::"+totalScore)
-    if(totalScore==0)totalScore=Double.NegativeInfinity
     return totalScore
 
   }
@@ -418,248 +415,11 @@ class GroupFinderGreedy {
     return ((n * choose(n-1,k-1))/k)
   }
 
-  def getActualEdges(potentialEdges:ListBuffer[(Long,Long)]): ListBuffer[(Long,Long)] ={
-    val actualEdges:ListBuffer[(Long,Long)]=new ListBuffer[(Long, Long)]()
+  def playWithGroup(): Unit ={
 
-    if(inGlobalCoh){
-      potentialEdges.foreach{e=>
-        if(pairActsMap.contains(e)){
-          actualEdges += e
-        }
-      }
-    }
-    if(inCatCoh){
-      potentialEdges.foreach{e=>
-        cats.foreach{c=>
-          if(pairCatsActsMap.contains((e,c))){
-            actualEdges += e
-          }
-        }
-      }
-    }
-    if(inGlobalSeqCoh){
-      potentialEdges.foreach{e=>
-        if(pairSeqActsMap.contains(e)){
-          actualEdges += e
-        }
-      }
-
-    }
-    if(inCatSeqCoh){
-      //println("sequential category pair")
-      potentialEdges.foreach{e=>
-        cats.foreach{c=>
-          if(pairSeqCatsActsMap.contains((e,c))){
-            actualEdges += e
-            //println("correct for "+(e,c))
-          }
-          else{
-            //println("not true for::"+e,c)
-          }
-        }
-      }
-    }
-    return actualEdges.distinct
-
-  }
-
-  /**approximation ratio is  number of triangles vertex participate in / degree of vertex*/
-  def findApproximationRatio(vertexNeig:ListBuffer[Long],vertexList:ListBuffer[(Long,Long)]): Double ={
-    val neighbPairs=findPairEdgesInGroup(vertexNeig)
-
-    val vertexListMap=vertexList.map(t=> (t,1)).toMap
-    var trianglesCount=0
-    neighbPairs.foreach{np=>
-      if(vertexListMap.contains(np)){
-        trianglesCount += 1
-      }
-    }
-    //println("triangle count, degree::"+trianglesCount, vertexNeig.size  )
-    val approxRatio=trianglesCount.toDouble/vertexNeig.size.toDouble
-    return approxRatio
-  }
-
-  def initializeSeedSet(inUsers:ListBuffer[Long]): ListBuffer[Long] ={
-    var seedSet:ListBuffer[Long]=ListBuffer[Long]()
-    //var seedVertex:Long=0L
-    //println("group of users ::"+inUsers)
-    val potentialEdges=findPairEdgesInGroup(inUsers)
-    //println("potential edges are ::"+potentialEdges)
-    val actualEdges:ListBuffer[(Long,Long)]=getActualEdges(potentialEdges)
-    //println("actual edges are::"+actualEdges)
-    if(actualEdges.size>0) {
-      val directedEdges: ListBuffer[(Long, Long)] = new ListBuffer[(Long, Long)]() //duplicate edges
-      actualEdges.foreach { e =>
-        directedEdges += e
-        directedEdges += ((e._2, e._1))
-      }
-      val vertexNeighbours = directedEdges.groupBy(t => t._1).map(t => (t._1, t._2.map(it => it._2)))
-
-      val vertexApproxRatio = vertexNeighbours.map { v =>
-        (v._1, findApproximationRatio(v._2, actualEdges))
-      }
-      val seedVertex = vertexApproxRatio.toList.sortBy(t => -t._2).head._1
-
-      seedSet += seedVertex
-      seedSet ++= vertexNeighbours.getOrElse(seedVertex, null)
-      //println("Seed set is ::" + seedSet)
-      //vertexApproxRatio.foreach(println)
-    }
-    return seedSet
-  }
-
-  def updateTopKGroups( cList:ListBuffer[(ListBuffer[Long],Double)],element:(ListBuffer[Long],Double),k:Int)
-  : ListBuffer[(ListBuffer[Long],Double)] ={
-    if(cList.size>0) {
-      if (element._2 >= cList.last._2) {
-        cList += element
-        return cList.sortBy(t => -t._2).distinct.take(k)
-      } else
-        return cList
-    }else return cList+=element
   }
 
   def findBestGroupGreedy(
-                              affinity:Map[Long,Double],
-                              inUserActsMap:Map[Long, ListBuffer[(Long, Long, ListBuffer[String], (String, String))]],
-                              inUserCatsActsMap:Map[(Long,String), ListBuffer[(Long, Long, ListBuffer[String], (String, String))]],
-                              inPairActs:Map[(Long,Long),ListBuffer[((Long,Long),ListBuffer[Long],ListBuffer[String],(String,String))]],
-                              inPairCatsActs:Map[((Long,Long),String),ListBuffer[(((Long,Long),String),ListBuffer[Long],ListBuffer[String],(String,String))]],
-                              inCats:List[String],
-                              inAlpha:Double,
-                              inMu:Double,
-                              inSurplusAlpha:Double,
-                              inUserGroup:ListBuffer[Long],
-                            inK:Int): ListBuffer[(ListBuffer[Long],Double)] ={ //Using maximal cliques plus surplus
-    // receive group of users and return a subset that is the best in terms of surplus
-    val k=inK
-    var topK:ListBuffer[(ListBuffer[Long],Double)]=new ListBuffer[(ListBuffer[Long], Double)]()
-  var currentGroup:ListBuffer[Long]=new ListBuffer[Long]()
-    var remainingGroup:ListBuffer[Long]=new ListBuffer[Long]()
-    var b1=true //outerCheck
-    var t=1 //iteration
-    val TMax=10 //maximum number of iterations
-    var b2=false //inner while loop check
-
-    var seedSet:ListBuffer[Long]=new ListBuffer[Long]()
-    if(inUserGroup.size>2) {
-
-      seedSet = initializeSeedSet(inUserGroup)
-      if(seedSet.size==0){
-        return ListBuffer((inUserGroup,Double.NegativeInfinity))
-      }
-    }else seedSet++=inUserGroup //if two then both are seed set
-    currentGroup=seedSet.clone()
-    var maxSurplus= findGroupTravelScore(affinity,inUserActsMap,inUserCatsActsMap,inPairActs
-      ,inPairCatsActs,inCats,inAlpha,inMu,currentGroup) - inSurplusAlpha* choose(currentGroup.size,2).toDouble
-    topK=updateTopKGroups(topK,(currentGroup.sortBy(t=> t),maxSurplus),k)
-
-    //println("Input Group and surplus is::"+currentGroup,maxSurplus)
-    remainingGroup=(inUserGroup.clone() -- currentGroup.clone())
-    while(b1 && t<=TMax){
-      b2=true
-      while (b2){
-        var i= 0
-        var extCheck=true
-        while(i<remainingGroup.size && extCheck){
-          val potGroup= currentGroup.clone() :+ remainingGroup(i)
-          val potSurplus=findGroupTravelScore(affinity,inUserActsMap,inUserCatsActsMap,inPairActs
-            ,inPairCatsActs,inCats,inAlpha,inMu,potGroup) - inSurplusAlpha* choose(potGroup.size,2).toDouble
-          topK=updateTopKGroups(topK,(potGroup.sortBy(t=> t),potSurplus),k)
-          if(potSurplus>maxSurplus){
-            extCheck= false
-            remainingGroup = remainingGroup.clone() - remainingGroup(i)
-            currentGroup=potGroup.clone()
-            maxSurplus=potSurplus
-          }
-          i=i+1
-        }
-        if(extCheck){// if no vertex found that can extend the group to increase surplus
-          b2=false
-        }
-      }
-      // test if any improvement comes by deletion of any node
-      if(currentGroup.size>=3) {
-        var delCheck = true
-        var j = 0
-        while (j < currentGroup.size && delCheck == true) {
-          val potDelGroup = currentGroup.clone() - currentGroup(j)
-          val potDelSurplus = findGroupTravelScore(affinity, inUserActsMap, inUserCatsActsMap, inPairActs
-            , inPairCatsActs, inCats, inAlpha, inMu, potDelGroup) - inSurplusAlpha * choose(potDelGroup.size, 2).toDouble
-          topK = updateTopKGroups(topK, (potDelGroup.sortBy(t=> t), potDelSurplus), k)
-          if (potDelSurplus >= maxSurplus) {
-            delCheck = false
-            remainingGroup = remainingGroup.clone() :+ currentGroup(j)
-            currentGroup = potDelGroup.clone()
-            maxSurplus = potDelSurplus
-          }
-          j = j + 1
-        }
-        if (delCheck) {
-          // no such vertex is found
-          b1 = false
-        }
-      }
-      t+=1
-    }
-
-    //println("best group,surplus is ::"+currentGroup,maxSurplus)
-    //println("top k groups are ::"+topK)
-    //return (currentGroup,maxSurplus)
-    return topK
-
-/*
-
-
-
-    var runGroup=new ListBuffer[Long]()
-    runGroup=inUserGroup.sortBy(t=> t).clone()
-    var i= 0
-    while(i<runGroup.size ){
-      val u=runGroup(i)
-      /*if(runGroup.contains(6802)) {
-        println("runGroup is ::" + runGroup)
-        println("user is ::" + u)
-      }*/
-      val newInnerGroup=runGroup - u
-      // do check the surplus here
-      val currentGroupTravelScore=findGroupTravelScore(affinity,inUserActsMap,inUserCatsActsMap,inPairActs
-        ,inPairCatsActs,inCats,inAlpha,inMu,newInnerGroup)
-      /*if(runGroup.contains(6802))
-        println("new Inner Group, score ::"+newInnerGroup,currentGroupTravelScore)*/
-      val currentSurplus=currentGroupTravelScore - inSurplusAlpha*choose(newInnerGroup.size,2).toDouble
-      /*if(runGroup.contains(6802))
-        println("------current vs. max::"+currentSurplus,maxSurplus)*/
-      //println()
-      if(maxSurplus==0.0) maxSurplus=Double.NegativeInfinity
-      if(currentSurplus>maxSurplus){
-        //println("group changed !!")
-        maxSurplus=currentSurplus
-        runGroup=newInnerGroup.clone()
-        //println("group changed to !!"+runGroup )
-        i = 0
-      }
-      i += 1
-    }
-    /*runGroup.foreach{u=>
-      println("runGroup is ::"+runGroup)
-      println("user is ::"+u)
-      val newInnerGroup=runGroup - u
-      if(newInnerGroup.contains(3)){
-        println("group changed !!")
-        runGroup=newInnerGroup.clone()
-        println("group changed to !!"+runGroup )
-      }
-
-    }*/
-
-    println(" best group and surplus is ::",runGroup,maxSurplus)
-    return (runGroup,maxSurplus)
-    */
-
-  }
-
-  def findBestGroupGreedyOld(
                           affinity:Map[Long,Double],
                           inUserActsMap:Map[Long, ListBuffer[(Long, Long, ListBuffer[String], (String, String))]],
                           inUserCatsActsMap:Map[(Long,String), ListBuffer[(Long, Long, ListBuffer[String], (String, String))]],
@@ -672,13 +432,8 @@ class GroupFinderGreedy {
                           inUserGroup:ListBuffer[Long]
                          ): (ListBuffer[Long],Double) ={ //Using maximal cliques plus surplus
     // receive group of users and return a subset that is the best in terms of surplus
-
-
-    initializeSeedSet(inUserGroup)
-
     var maxSurplus= findGroupTravelScore(affinity,inUserActsMap,inUserCatsActsMap,inPairActs
       ,inPairCatsActs,inCats,inAlpha,inMu,inUserGroup) - inSurplusAlpha* choose(inUserGroup.size,2).toDouble
-    println("Input Group and surplus is::"+inUserGroup,maxSurplus)
     var runGroup=new ListBuffer[Long]()
     runGroup=inUserGroup.sortBy(t=> t).clone()
     var i= 0
@@ -720,7 +475,7 @@ class GroupFinderGreedy {
 
     }*/
 
-    println(" best group and surplus is ::",runGroup,maxSurplus)
+    //println(" best group and surplus is ::",runGroup,maxSurplus)
     return (runGroup,maxSurplus)
 
   }
@@ -752,7 +507,6 @@ class GroupFinderGreedy {
   var pairSeqActsMap:Map[(Long,Long),ListBuffer[((Long,Long),ListBuffer[Long],ListBuffer[String],(String,String))]]=Map()
   var pairSeqCatsActsMap:Map[((Long,Long),String),ListBuffer[(((Long,Long),String),ListBuffer[Long],ListBuffer[String],(String,String))]]=Map()
   var maxSeqActsByPairOnCatMap:Map[String,(((Long,Long),String),Int)]=Map()
-  var maxSeqActsByAnyPair:Long=0L
   var maxActsByPairOnCatMap:Map[String,(((Long,Long),String),Int)]=Map()
   var maxActsByAnyPair:Long=0L
   var lambda:Double=0.0
@@ -771,46 +525,36 @@ class GroupFinderGreedy {
   def runner(userActsCatsTSFile:String,
                        groupActsCatsTSFile:String,ConvoysPairUserPairSeqLoc:String,friendsFile:String,inCat:List[String],
              inLambda:Double,inAlpha:Double,inMu:Double, inEta:Double,inSurplusAlpha:Double,
-             globalAff:Boolean,localAff:Boolean,globalCoh:Boolean,catCoh:Boolean,globalSeqCoh:Boolean,catSeqCoh:Boolean,inK:Int)
-  : Unit = {
+             globalAff:Boolean,localAff:Boolean,globalCoh:Boolean,catCoh:Boolean,globalSeqCoh:Boolean,catSeqCoh:Boolean)
+  : ListBuffer[Long] ={
     val fr = new fileReaderLBSN
     val friendsMap = fr.readFriendsFile(friendsFile).groupBy(t => t._1).map(t => (t._1, t._2.map(it => it._2)))
-    val userActsTS = findUserActs(userActsCatsTSFile) // ListBuffer[(user, Loc, List[categories], (ts, te))]
-    userActsMap = userActsTS.groupBy(t => t._1) // group activities by user: List[(user, List[(user, location, List[cat], (startTime,endTime))])]
+    val userActsTS=findUserActs(userActsCatsTSFile) // ListBuffer[(user, Loc, List[categories], (ts, te))]
+    userActsMap=userActsTS.groupBy(t=> t._1) // group activities by user: List[(user, List[(user, location, List[cat], (startTime,endTime))])]
     //println("user acts map size ::"+userActsMap.size)
-    userCatActMap = userActsMapToUserCatActsMap(userActsMap, inCat) //Map[(user,cat), ListBuffer[(user, loc, List[cat], (ts, te))]]
-    val catsActsMap = findCatActsMap(userActsTS, inCat) //Map[cat, List[(user, loc, List[cats], (ts, te))]]
+    userCatActMap=userActsMapToUserCatActsMap(userActsMap,inCat) //Map[(user,cat), ListBuffer[(user, loc, List[cat], (ts, te))]]
+    val catsActsMap=findCatActsMap(userActsTS,inCat) //Map[cat, List[(user, loc, List[cats], (ts, te))]]
 
-    /** user affinities */
-    val users = friendsMap.keys.to[ListBuffer]
+    /**user affinities*/
+    val users= friendsMap.keys.to[ListBuffer]
     //println("all users are ::"+users.size)
-    lambda = inLambda
-    cats = inCat
-    if (inGlobalAff && inLocalAff) {
+    lambda=inLambda
+    cats=inCat
+    if(inGlobalAff && inLocalAff) {
       userScorePair = getUsersAffinity(users, userActsMap, userCatActMap, catsActsMap, cats, lambda)
         .sortBy(t => -t._2).toMap
     }
     // pair activities
-    var pairActs:ListBuffer[((Long,Long),ListBuffer[Long],ListBuffer[String],(String,String))]=new ListBuffer()
-    if (globalCoh || catCoh) {
-    pairActs = findPairActs(groupActsCatsTSFile)
-    pairActsMap = pairActs.groupBy(t => t._1)
-  }
-    if(catCoh) {
-      val pairCatsActs = findPairActsCats(pairActs)
-      pairCatsActsMap = pairCatsActs.groupBy(t => t._1)
-    }
+    val pairActs=findPairActs(groupActsCatsTSFile)
+    pairActsMap=pairActs.groupBy(t=> t._1)
+    val pairCatsActs=findPairActsCats(pairActs)
+    pairCatsActsMap=pairCatsActs.groupBy(t=> t._1)
 
     // sequential Activities
-    var pairSeqActs:ListBuffer[((Long,Long),ListBuffer[Long],ListBuffer[String],(String,String))]=new ListBuffer()
-    if(globalSeqCoh || catSeqCoh) {
-      pairSeqActs = findPairActs(ConvoysPairUserPairSeqLoc)
-      pairSeqActsMap = pairSeqActs.groupBy(t => t._1)
-    }
-    if(catSeqCoh) {
-      val pairCatsSeqActs = findPairActsCats(pairSeqActs)
-      pairSeqCatsActsMap = pairCatsSeqActs.groupBy(t => t._1)
-    }
+    val pairSeqActs=findPairActs(ConvoysPairUserPairSeqLoc)
+    pairSeqActsMap=pairSeqActs.groupBy(t=> t._1)
+    val pairCatsSeqActs=findPairActsCats(pairSeqActs)
+    pairSeqCatsActsMap=pairCatsSeqActs.groupBy(t=> t._1)
 
     alpha=inAlpha
     mu=inMu
@@ -822,20 +566,12 @@ class GroupFinderGreedy {
     inCatCoh=catCoh
     inGlobalSeqCoh=globalSeqCoh
     inCatSeqCoh=catSeqCoh
-    if(inCatSeqCoh)
     maxSeqActsByPairOnCatMap=getMaxSeqActsByPairOnCatMap(pairSeqCatsActsMap,cats)
-    if(inGlobalSeqCoh)
-      maxSeqActsByAnyPair=pairSeqActsMap.toList.sortBy(t=> -t._2.size).head._2.size
-    if(inCatCoh)
     maxActsByPairOnCatMap=getMaxSeqActsByPairOnCatMap(pairCatsActsMap,cats) //same function as above as purpose is same
-    if(inGlobalCoh)
     maxActsByAnyPair=pairActsMap.toList.sortBy(t=> -t._2.size).head._2.size // maximum number of activities by any pair on all locations/categories
 
-    //val testUsers:ListBuffer[Long]=new ListBuffer[Long](53,993,301,191,315,176)
-    val testUsers:ListBuffer[Long]=ListBuffer(6181, 6188, 6189, 6331, 9683) //8520, 10007
-    //val testUsers:ListBuffer[Long]=ListBuffer(8520, 10007) //
 
-    //findBestGroupGreedy(userScorePair,userActsMap,userCatActMap,pairActsMap,pairCatsActsMap,inCat,alpha,mu,inSurplusAlpha,testUsers,inK)
+    //findBestGroupGreedy(userScorePair,userActsMap,userCatActMap,pairActsMap,pairCatsActsMap,inCat,alpha,mu,usersGroup)
 
     /*val alpha:Double=inAlpha
     val mu:Double=inMu
@@ -874,7 +610,7 @@ class GroupFinderGreedy {
     println("new map size::"+tripCatActsMap.size)
     // no new addition in the map: individual and group activities can be send separately as they have redundant activities
     // for every new group have to match for all the superset of this new potential group: that will be the activities of this*/
-    //return ListBuffer(1L)//group
+    return ListBuffer(1L)//group
   }
 
 

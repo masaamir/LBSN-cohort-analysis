@@ -1,7 +1,7 @@
 package MaximalCliquesBase
 
 import FormatData.fileReaderLBSN
-import TravelGroupRecommendation.GroupFinderGreedy
+import TravelGroupRecommendation.{GroupFinderGreedy, GroupFinderGreedyOld}
 
 import scala.collection.mutable.ListBuffer
 
@@ -29,14 +29,33 @@ class TravelGroupFinder {
   }
 
   def maxPossibleSurplus(inGroup:ListBuffer[Long]): Double ={
-    return (choose(inGroup.size,2) - gfg.surplusAlpha)
+    //return (choose(inGroup.size,2) - gfg.surplusAlpha) // changed from this to following
+    //return (choose(inGroup.size,2) - gfg.surplusAlpha*choose(inGroup.size,2))
+    return (choose(inGroup.size,2)*(1 - gfg.surplusAlpha))
 
   }
 
   var currentGroup:ListBuffer[Long]=new ListBuffer[Long]()
   var currentSurplus=Double.NegativeInfinity
   var selectedGroup:(ListBuffer[Long],Double)=null
+  var selectedGroupList:ListBuffer[(ListBuffer[Long],Double)]=new ListBuffer[(ListBuffer[Long], Double)]()
+  var topK:ListBuffer[(ListBuffer[Long],Double)]=new ListBuffer[(ListBuffer[Long], Double)]()
+  //topK ++= ListBuffer(Double.NegativeInfinity,)
+  var k:Int=0
 
+  def updateTopKGroups(cList:ListBuffer[(ListBuffer[Long],Double)],newList:ListBuffer[(ListBuffer[Long],Double)],k:Int)
+  : ListBuffer[(ListBuffer[Long],Double)] ={
+    if(cList.size>0) {
+      if (cList.last._2 < newList.head._2) {
+        cList ++= newList
+        return cList.sortBy(t => -t._2).distinct.take(k)
+      }
+      else return cList
+    }else return newList
+  }
+
+  var savingCount=0
+  var notSaved=0
   def Expand(SUBG:ListBuffer[Long],CAND:ListBuffer[Long],friends:Map[Long,ListBuffer[Long]],Q:ListBuffer[Long]): Unit ={
     //println("------------------------EXPAND----------------------")
     //println("----------------------------------------------")
@@ -50,22 +69,30 @@ class TravelGroupFinder {
       //println("Clique is **::"+inQ) //
       // compute travel score
       /**compute Travel Score*/
+      val groupNSurplus:ListBuffer[(ListBuffer[Long],Double)]=gfg.findBestGroupGreedy(gfg.userScorePair,gfg.userActsMap,gfg.userCatActMap,
+        gfg.pairActsMap,gfg.pairCatsActsMap, gfg.cats,gfg.alpha,gfg.mu,gfg.surplusAlpha,inQ,k)
+      //println("existing topk::"+topK)
+      //println("new Coming ::"+groupNSurplus)
 
+      topK=updateTopKGroups(topK,groupNSurplus,k)
+      //println("updated topk::"+topK)
+
+      /*
       var groupNSurplus:(ListBuffer[Long],Double)=gfg.findBestGroupGreedy(gfg.userScorePair,gfg.userActsMap,gfg.userCatActMap,
-        gfg.pairActsMap,gfg.pairCatsActsMap,
-        gfg.cats,gfg.alpha,gfg.mu,gfg.surplusAlpha,inQ)
+        gfg.pairActsMap,gfg.pairCatsActsMap, gfg.cats,gfg.alpha,gfg.mu,gfg.surplusAlpha,inQ)
       /*if(inQ.contains(6802) && inQ.contains(13553)){
         println("required group n Surplus::"+groupNSurplus)
       }*/
       if(groupNSurplus._2==0.0){
         groupNSurplus=(groupNSurplus._1,Double.NegativeInfinity)
       }
+      //val lastPair=
       if(groupNSurplus._2> currentSurplus) {
         currentGroup = groupNSurplus._1
         currentSurplus = groupNSurplus._2
-        //println(" Changed:: group,surplus::",groupNSurplus)
+        println(" Changed:: group,surplus::",groupNSurplus)
         selectedGroup=groupNSurplus
-      }
+      }*/
     }
     else {
       // find a vertex u that maximize difference CAND intersection friends of u
@@ -92,8 +119,14 @@ class TravelGroupFinder {
           val candq = inCand.intersect(friendsQ)
           val potentialGroup=(candq.clone() ++ inQ.clone() :+ q).distinct
           //println("newTest is ::"+newTest)
-          if(maxPossibleSurplus(potentialGroup) < currentSurplus){ // replace sum with maximum possible surplus of the group bound here !!!
+          /** need to remove true for our algo, it is just for time comparison*/
+          var currentMinSurplus=Double.NegativeInfinity
+          if(topK.size>0){
+            currentMinSurplus=topK.last._2
+          }
+          if(maxPossibleSurplus(potentialGroup) < currentMinSurplus ){ // replace sum with maximum possible surplus of the group bound here !!!
             //subgq.clear()// new ListBuffer[Long]() // even no need
+            savingCount += 1
             if((inQ:+q).distinct.size>1) {
               //println("restricted !!!!! "+(inQ :+q).distinct) /** record restricted pairs here*/
               //inQ.clear()
@@ -101,8 +134,11 @@ class TravelGroupFinder {
             }
           }
           //println("Q before expanding is::"+inQ)
-          else // expand for only those elements which have potential to be clique
-          Expand(subgq, candq, friends, inQ)
+          else {
+            // expand for only those elements which have potential to be clique
+            Expand(subgq, candq, friends, inQ)
+            notSaved +=1
+          }
           //println("removing " + q)
           inCand -= q
           //println("back")
@@ -130,18 +166,22 @@ class TravelGroupFinder {
 var gfg=new GroupFinderGreedy
   def runnerTravelGroup(userActsCatsTSFile:String,groupActsCatsTSFile:String, ConvoysPairUserPairSeqLoc:String,
                         friendsFile:String,inCat:List[String],inLambda:Double,inAlpha:Double,inMu:Double,inEta:Double,inSurplusAlpha:Double,
-                        globalAff:Boolean,localAff:Boolean,globalCoh:Boolean,catCoh:Boolean,globalSeqCoh:Boolean,catSeqCoh:Boolean)
-  : (ListBuffer[Long],Double) ={
+                        globalAff:Boolean,localAff:Boolean,globalCoh:Boolean,catCoh:Boolean,globalSeqCoh:Boolean,catSeqCoh:Boolean,inK:Int)
+  : ListBuffer[(ListBuffer[Long],Double)] ={
     //val usersGroup:ListBuffer[Long]=ListBuffer(9683,6181,1718)
     //val gfg=new GroupFinderGreedy
     /**initialize values*/
     currentGroup=new ListBuffer[Long]()
     currentSurplus=Double.NegativeInfinity
     selectedGroup=null
+    topK= ListBuffer((ListBuffer(0L),Double.NegativeInfinity))//,new ListBuffer[(ListBuffer[Long], Double)]()
+    k=inK
+    savingCount=0
+    notSaved=0
 
 
     gfg.runner(userActsCatsTSFile,groupActsCatsTSFile,ConvoysPairUserPairSeqLoc,friendsFile,inCat,inLambda,inAlpha,inMu,inEta,
-      inSurplusAlpha,globalAff,localAff,globalCoh,catCoh,globalSeqCoh,catSeqCoh)
+      inSurplusAlpha,globalAff,localAff,globalCoh,catCoh,globalSeqCoh,catSeqCoh,k)
     /*val group=gfg.findBestGroupGreedy(gfg.userScorePair,gfg.userActsMap,gfg.userCatActMap,gfg.pairActsMap,gfg.pairCatsActsMap,
       gfg.cats,gfg.alpha,gfg.mu,usersGroup)*/
 
@@ -152,7 +192,9 @@ var gfg=new GroupFinderGreedy
     val Q:ListBuffer[Long]=new ListBuffer[Long]()
 
     Expand(users,users,friends,Q)
-    return selectedGroup
+    println("Saving, notSaved, %saved count is ::"+savingCount,notSaved, (savingCount.toDouble/(savingCount+notSaved)))
+    println("Top k selections are ::"+topK)
+    return topK//selectedGroup
 
   }
 
