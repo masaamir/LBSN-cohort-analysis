@@ -40,8 +40,8 @@ class fileReaderLBSN {
   def readCheckinFile(checkinFile: String): List[(Long, Date, Double, Double, String, Long, String)] = {
     // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
     val df = new DataFormatter // data formatter object
-    val checkins = scala.io.Source.fromFile(checkinFile).getLines()
-        .map(t => t.split("\t"))
+    val checkins = scala.io.Source.fromFile(checkinFile).getLines().toList
+        .map(t => t.split("\t")).filter(t=> t(1).contains("T") &&t(1).contains("Z"))
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(1)))
         .toList.distinct
     return checkins //{(user,Date,lat,lon,locStr,LocLong,dateStringActual)}

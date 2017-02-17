@@ -10,7 +10,7 @@ import scala.collection.mutable.{ListBuffer, PriorityQueue}
   * Created by aamir on 20/01/17.
   */
 class mainFunctionRunner {
-
+/*
   /**Wee places*/
   val weeFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/Wee.txt"
 
@@ -26,6 +26,23 @@ class mainFunctionRunner {
   val pairUserPairSeqActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/GroupActivities/PairGroupParSequentialActsWithCats/Wee.txt"
   /**Test data*/
   val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/ConvoysWithCat/Wee.txt"
+*/
+
+  /**FourSquare*/
+  val FSFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/FS.txt"
+
+  /***/
+  val inputCategoriesFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/InputCats/FS.txt"
+  /**Training Data Files*/
+  val convoysTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/FS.txt_first_0.5"
+  val catCheckins="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/FS.txt_first_0.5"
+  var convoysCatTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/FS.txt_first_0.5"
+
+  val userActivitiesTSWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/FS.txt_first_0.5"
+  val groupActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/FS.txt_first_0.5"
+  val pairUserPairSeqActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/FS.txt_first_0.5"
+  /**Test data*/
+  val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/FS.txt_second_0.5"
 
   def findMatchingCats(cats:ListBuffer[String],filePath:String)
   :ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[String],(Long,Long))] ={
@@ -63,6 +80,26 @@ class mainFunctionRunner {
     return sumSize/predGroup.size.toDouble
   }
 
+  def findSuitableInputCats(): Unit ={
+
+    val trainConvoysFile=convoysCatTrainingFile
+    val testConvoysFile=convoysCatTestFile
+    val fr=new fileReaderLBSN
+    val trainConvoys=fr.readConvoyCatsFile(trainConvoysFile)
+    val testConvoys=fr.readConvoyCatsFile(testConvoysFile)
+
+    trainConvoys.foreach{tc=>
+      testConvoys.foreach{testC=>
+        if((tc._1.intersect(testC._1)).size>1){
+          if((tc._3.intersect(testC._3)).size>1){
+            println("categories are ::"+tc._3.intersect(testC._3))
+          }
+        }
+      }
+    }
+
+  }
+
   def evaluatePredictedGroups: Unit = {
 
     /** get categories from the sample file for input */
@@ -73,9 +110,9 @@ class mainFunctionRunner {
     val globalAff = false
     val localAff = false
     val globalCoh = false
-    val catCoh = false
+    val catCoh = true
     val globalSeqCoh = false
-    val catSeqCoh = true
+    val catSeqCoh = false
 
     /***Time and memory consumption***/
       var computationTime=0L
@@ -89,7 +126,7 @@ class mainFunctionRunner {
       println("------------K-------::"+k)
 
     /** choose values of the parameters */
-    val lambda = 0.5 // affinity global vs local
+    val lambda = 0 // affinity global vs local
     var alpha = 0 // cohesiveness global vs local
     val mu = 0 // affinity vs cohesiveness -- should be zero as we are not considering affinity , previously it was 0.5
     val eta = 0 // sequential activities on all locations vs. locations of input categories
@@ -113,13 +150,16 @@ class mainFunctionRunner {
       var correctPredicitonRatio: Double = 0.0
       var catConvoyTestCount = 0
       var avgGroupSize=0.0
+      var totalCorrectPred=0
+      var totalAvailableGroups=0
+      catsList=catsList.map(t=> t.map(it=> it.trim))
 
       //catsList = catsList.take(1)
       catsList.foreach { cats =>
         println("categories are::" + cats)
         starTime=System.currentTimeMillis()
         /** Predict group on inputs */
-        predictedGroupList = tgf.runnerTravelGroup(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, weeFriends,
+        predictedGroupList = tgf.runnerTravelGroup(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, FSFriends,
           cats.toList, lambda, alpha, mu, eta, surplusAlpha, globalAff, localAff, globalCoh, catCoh, globalSeqCoh, catSeqCoh, k)
         endTime=System.currentTimeMillis()
         println("Time for this query in mSec::"+(endTime-starTime))
@@ -132,6 +172,14 @@ class mainFunctionRunner {
         var correctPredictionPerList = 0
         var countCorrectMatch: Int = 0
         val convoysWithCatsInTD = findMatchingCats(cats, convoysCatTestFile)
+        val totalConvoysWithCatsInTD=convoysWithCatsInTD.map(t=> t._1).distinct
+        if(totalConvoysWithCatsInTD.size>k){
+          totalAvailableGroups += k
+        }else{
+          totalAvailableGroups += totalConvoysWithCatsInTD.size
+        }
+
+        println("Total Convoys of this category in test dataset are ::"+totalConvoysWithCatsInTD.size,totalConvoysWithCatsInTD)
         if (convoysWithCatsInTD.size > 0) {
           catConvoyTestCount += 1 // any group with these cats exist in test data
         }
@@ -156,6 +204,7 @@ class mainFunctionRunner {
           correctPrediction += 1
           println("prediction is true")
         }
+        totalCorrectPred+=correctPredictionPerList
         correctPredicitonRatio += (correctPredictionPerList.toDouble / predictedGroupList.size.toDouble)
       }
       println()
@@ -166,6 +215,7 @@ class mainFunctionRunner {
       println("correct Predictions ratio in Total ::" + correctPredicitonRatio / catsList.size)
       println("Number of times any convoys exist with the input categories in test Data::" + catConvoyTestCount)
       println("Average time in milliSec is ::"+computationTime.toDouble/catsList.size.toDouble)
+      println(" Correct prediction based on availability in Test Data::"+totalCorrectPred.toDouble/totalAvailableGroups.toDouble)
       println()
       println()
       println()
@@ -247,7 +297,7 @@ class mainFunctionRunner {
     val cats=List("Religious","Nightlife")
 
     val gfg=new GroupFinderGreedy
-    gfg.runner(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, weeFriends,
+    gfg.runner(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, FSFriends,
       cats, lambda, alpha, mu,eta, surplusAlpha, globalAff, localAff, globalCoh, catCoh,globalSeqCoh,catSeqCoh,k)
 
   }
