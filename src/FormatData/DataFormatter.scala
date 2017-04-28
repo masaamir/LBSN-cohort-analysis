@@ -157,7 +157,7 @@ class DataFormatter {
         cats ++= venueMap.getOrElse(l,ListBuffer("n\\a"))
         //else println(" not found")
       }
-      (c._1,c._2,c._3,cats)
+      (c._1,c._2,c._3,cats.distinct)
     }
     newConvoys.foreach{c=>
       writer.println(c._1.mkString(",")+"\t"+c._2.mkString(",")+"\t"+c._4.mkString(",")+"\t"+c._3.head+","+c._3.last)
@@ -221,7 +221,7 @@ class DataFormatter {
 
   def getCheckinsWithCategories(fileCheckins:String,fileVenues:String, fileWriteCheckWithCat:String): Unit ={
     val fr=new fileReaderLBSN
-    val checkins=fr.readCheckinFileNew(fileCheckins)
+    val checkins=fr.readCheckinFileNew(fileCheckins).filter(t=> t._6!=0  )
     val venues=fr.readVenuesFileWee(fileVenues)
     val writer=new PrintWriter(new File(fileWriteCheckWithCat))
     val lCatMap=venues.map(t=> (t.lId,t.lCategories)).toMap

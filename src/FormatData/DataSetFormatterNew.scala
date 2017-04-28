@@ -64,6 +64,54 @@ class DataSetFormatterNew {
     return result
   }
 
+  def formatGWVenues(venue1File:String,venue2File:String,chksFile:String,writeVenuesFile:String): Unit ={
+    val writer=new PrintWriter(new File(writeVenuesFile))
+    val venue1 = scala.io.Source.fromFile(venue1File).getLines().drop(1).toList//.take(10)
+      .map(t=> t.split(","))
+    //venue1.foreach(t=> println(t.mkString(",")))
+    //println("array size is ::"+venue1(0).size)
+
+    val formatedVenues=venue1.map(t=> (t(0).toLong,t(2).toDouble,t(3).toDouble,"city","state","country",t(12).replaceAll("'}]\"","")
+      .replaceAll("'name': '","").trim))
+    println("formated venues are :: ********************")
+    formatedVenues.foreach{v=>
+      writer.println(v._1+"\t"+v._2+"\t"+v._3+"\t"+v._4+"\t"+v._5+"\t"+v._6+"\t"+v._7)
+    }
+    writer.close()
+
+    /*
+    val ids=venue1.map(t=> t.split(",")).map(t=> t(0))
+        //.distinct.map(t=> (t.toLong,1)).toMap
+    println("total venues are ::"+ids.size)*/
+
+
+    /*val frb=new fileReaderLBSN
+    val checkins=frb.readCheckinFile(chksFile)
+    println("original checkins are ::"+checkins.size)
+    val newChks=checkins.filter(t=> ids.contains(t._6))
+    println("new Checkins are::"+newChks.size)
+    */
+
+
+
+    /*
+    venue1.foreach{v=>
+      println(v)
+    }*/
+
+      //.map(t => t.split(",")).map(t => (t(0).toLong, (t(2).toDouble, t(3).toDouble))).toMap
+    //val venue2 = scala.io.Source.fromFile(venue2File, "latin1").getLines().drop(1)
+      //.map(t => t.split(",")).map(t => (t(0).toLong, (t(1).toDouble, t(2).toDouble))).toMap
+
+
+    val fr=new fileReaderLBSN
+    //val checkins=fr.readCheckinFile(chksFile)
+
+
+
+  }
+
+
   def formatGWDataSet(venue1File: String, venue2File: String, friendsFile: String, checkinFile: String, friendWrite: String, checkInWrite: String): Unit = {
     val fWriter = new PrintWriter(new File(friendWrite))
     val chkWriter = new PrintWriter(new File(checkInWrite))
@@ -116,6 +164,22 @@ class DataSetFormatterNew {
   fWriter.close()*/
 
   }
+
+  def formatFSVenues(inputVenues:String, fileWriter:String): Unit ={ //remove "listBuffer"
+    val writer=new PrintWriter(new File(fileWriter))
+    var newCats:String=""
+    val venues=scala.io.Source.fromFile(inputVenues).getLines().toList//.take(10)
+        .map(t=> t.split("\t"))
+      .map{t=>
+        newCats=t(6).replaceAll("ListBuffer\\(","").replaceAll("\\)","")
+          .split(",").map(it=> it.trim).mkString(":")
+        //println("new Cat is::"+newCats)
+         (t(0),t(1),t(2),t(3),t(4),t(5),newCats.toString)
+        writer.println(t(0)+"\t"+t(1)+"\t"+t(2)+"\t"+t(3)+"\t"+t(4)+"\t"+t(5)+"\t"+newCats.toString)
+      }//.foreach(t=> println(t.toString))
+    writer.close()
+  }
+
   def formatFSSemanticsCA(friendsFile: String, checkinFile: String, friendWrite: String, checkInWrite: String, venueWrite:String): Unit ={
     val fWriter = new PrintWriter(new File(friendWrite))
     val chkWriter = new PrintWriter(new File(checkInWrite))
@@ -175,6 +239,7 @@ class DataSetFormatterNew {
 
 
   }
+
   def formatWEEDataSet(friendsFile: String, checkinFile: String, friendWrite: String, checkInWrite: String): Unit = {
     // assign a mapping to users and locations
     val fWriter = new PrintWriter(new File(friendWrite))
