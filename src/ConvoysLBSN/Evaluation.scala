@@ -28,7 +28,8 @@ class Evaluation {
     return stringDate
   }
 
-  def createDatasetForCrossValidation(inPercentTest: Double, inCCheckinsFile: String, inTrainCheckinFile: String, inTestCheckinFile: String): Unit = {
+  def createDatasetForCrossValidation(inPercentTest: Double, inCCheckinsFile: String,
+                                      inTrainCheckinFile: String, inTestCheckinFile: String): Unit = {
     val fr = new fileReaderLBSN
     /*val tempCheckins = scala.io.Source.fromFile(inCCheckinsFile).getLines().take(2)
       .map(t => t.split("\t"))

@@ -12,6 +12,24 @@ import scala.collection.mutable.ListBuffer
  */
 class StatFinder {
 
+  def friendsStats(friendsFile:String): Unit ={
+    val fr=new fileReaderLBSN
+    val rel=fr.readFriendsFile(friendsFile)
+    println("relationships are ::"+rel.size)
+
+  }
+
+  def checkinStats(checkinFile:String): Unit ={
+    val fr=new fileReaderLBSN
+    val checks=fr.readCheckinFile(checkinFile)
+    println("total Checkins are::"+checks.size)
+    val users=checks.map(t=> t._1).distinct
+    println("users are ::"+users.size)
+    val locations=checks.map(t=> t._3).distinct
+    println("locations are ::"+locations.size)
+
+  }
+
   def computeFriendsStatistics(friends: List[(Long, Long)]): (Long, Long, Long) = {
     //val totalUsers=friends.map(t=> t._1).distinct.size
     var totalUsers:ListBuffer[Long]=new ListBuffer[Long]()

@@ -11,6 +11,8 @@ import DataStatistics.StatFinder
 import FormatData.{DataFilter, DataFormatter, DataSetFormatterNew, fileReaderLBSN}
 import GridClustering.GridCluster
 import LBSNAnalysis.DataSetFormatter
+import LocationBehaviorAnalysis.DeltaTimeFinder
+import VisotorsPrediction.VPDataPreprator
 
 import scala.collection.mutable.ListBuffer
 
@@ -24,7 +26,6 @@ object mainClass {
 
   def main(args: Array[String]) = {
     //println("testing")
-
 
     val startTime = System.currentTimeMillis()
 
@@ -55,7 +56,7 @@ object mainClass {
 
 
 
-    val filesConsidered:ListBuffer[String]=ListBuffer("Wee.txt")
+    val filesConsidered:ListBuffer[String]=ListBuffer("GW_New.txt")//WeeFull.txt
     /**Original data to Clustered Data*/
     val dirCheckinsNC="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Checkins" // checkin directory non-clustered
     val dirCheckinsC="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Checkins"
@@ -66,21 +67,42 @@ object mainClass {
     val gridX=10
     val gridY=10
     val filesCheckins=new java.io.File(dirCheckinsNC).listFiles
-    /*
+
+
     filesCheckins.foreach{t=>
       if(filesConsidered.contains(t.getName)) {
         val gc = new GridCluster
         val fileName = t.getName
         println("File Name--------------::" + t.getName)
-        //gc.getClusters(dirCheckinsNC + "/" + fileName, gridX, gridY, dirCheckinsC + "/" + fileName, dirMapGridIdToLocIds + "/" + fileName) //(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)
+        gc.getClusters(dirCheckinsNC + "/" + fileName, gridX, gridY, dirCheckinsC + "/" + fileName, dirMapGridIdToLocIds + "/" + fileName) //(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)
         gc.getClusterdVenues(dirMapGridIdToLocIds + "/" + fileName,dirNCVenues+"/"+fileName,dirClusteredVenues+"/"+fileName)
+
         //convoyPattern.getConvoyTable(weeConvoys,weeFriendsFile,weeVenues,weeConvoyTableFile)
       }
     }
+
+
+
+    /** tau values */
+      val friendsFSOld="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/FS_Old_WOSemantics.txt"
+    val checkinsFSOld="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Checkins/FS_Old_WOSemantics.txt"
+    val tau="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/tau/FS_Old_WOSemantics.txt"
+    val dtf=new DeltaTimeFinder
+    //dtf.computeDeltaUsersUpdated(friendsFSOld,checkinsFSOld,8.0,tau)
+
+
+
     //test
-*/
+
+    /**checkins to checkinswithCats*/
+    val checkinsWithCatWeeFull="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/WeeFull.txt"
+
+    val df2=new DataFormatter
+    //df2.getCheckinsWithCategories(dirCheckinsC+"/WeeFull.txt",dirClusteredVenues+"/WeeFull.txt",checkinsWithCatWeeFull)
+
+
     /** Clustered Data to Convoys*/
-    println("**Finding Convoys**")
+    //println("**Finding Convoys**")
     val dirConvoysC="E:\\DataSet\\withSemantics\\Clustered\\Convoys"
     val dirFriendsNC="E:\\DataSet\\withSemantics\\NonClustered\\Dataset\\Friends"
     /*filesCheckins.take(1).foreach{t=>
@@ -134,12 +156,12 @@ object mainClass {
 
     val checkinsWee="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/Checkins/Wee.txt"
     //val originalCheckinsWee="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Checkins/Wee.txt"
-    val venuesCheckins="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Venues/Wee.txt"
+    val venuesCheckins="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Venues/WeeFull.txt"
     val checinsWithCatsWee="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/CheckinsWithCats/Wee.txt"
 
     val df=new DataFormatter
     val cats=List("Nightlife","Bar")
-    println("Function starts")
+    //println("Function starts")
     //df.getCheckinsWithCategories(checkinsWee,venuesCheckins,checinsWithCatsWee)
     //val newChecks=df.splitCheckinsOnCats(checinsWithCatsWee)
     val catScoreWee="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/temp/catScoreWee.txt"
@@ -152,10 +174,10 @@ object mainClass {
     val weeFriends="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/Wee.txt"
 
     //val group=eval.findGroupTopK(catScoreWee,2)
-    val group=eval.findGroupTopKFriends(catScoreWee,2,weeFriends)
-    eval.evaluateGroup(group,cats,weeConvoyTable)
+    //val group=eval.findGroupTopKFriends(catScoreWee,2,weeFriends)
+    //eval.evaluateGroup(group,cats,weeConvoyTable)
 
-    println("Function finished")
+    //println("Function finished")
 
 
     /**Test data-set */
@@ -173,6 +195,47 @@ object mainClass {
     val dirConvoysCTrain="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/Convoys"
     con.getConvoys(dirCheckinsTraining+"/"+file,dirFriendsNC+"/"+file,60,dirConvoysCTrain+"/"+file)
     */
+
+    /**visitor prediction */
+    /**prepare data-set*/
+    val vpdp=new VPDataPreprator
+
+    //vpdp.getU2LMatrixData()
+    //vpdp.getU2CatMatrixData()
+    //vpdp.getU2TimeMatrixData()
+
+    /**parallel convoy finder*/
+    val cfp=new ConvoyFinderParallel
+    val ds="GW_New.txt_first_0.25"//"GW_New.txt_first_0.5" //GW_New.txt_second_0.5
+    val tempCheckins="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Checkins/"+ds
+    val partConvoys="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/PartConvoys/"+ds
+    val convoys="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/"+ds
+    //cfp.divideActivities(tempCheckins,partConvoys)
+    //cfp.readPartConvoys(partConvoys)
+    //cfp.mergePartConvoys(partConvoys,convoys)
+
+    //foursquare : FS.txt_first_0.5, FS.txt_second_0.5
+    //Gowalla: "GW_New.txt_first_0.5" //GW_New.txt_second_0.5
+
+    val train="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/"+"FS.txt_first_0.5"
+    val test="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/"+"FS.txt_second_0.5"
+    val inputCat="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/InputCats/"+"FS.txt"
+
+
+
+
+    //cfp.evaluateConvoyBasedTravelerGroup(train,test,inputCat)
+    //cfp.evaluateConvoyBasedTravelerGroupAllCats(train,test)
+
+    val Friends="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/FS.txt"
+    val CheckinsNC="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Checkins/FS.txt"
+    val CheckinsC="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Checkins/FS.txt"
+    val sf=new StatFinder
+    //sf.friendsStats(Friends)
+    //sf.checkinStats(CheckinsNC)
+    //println(" now clustered ----------------")
+    //sf.checkinStats(CheckinsC)
+
 
 
     println("** Used Memory:  " + (runtime.totalMemory - runtime.freeMemory) / mb)
