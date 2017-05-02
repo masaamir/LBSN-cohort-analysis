@@ -12,6 +12,7 @@ import FormatData.{DataFilter, DataFormatter, DataSetFormatterNew, fileReaderLBS
 import GridClustering.GridCluster
 import LBSNAnalysis.DataSetFormatter
 import LocationBehaviorAnalysis.DeltaTimeFinder
+import TaskRunner.TaskExecuter
 import VisotorsPrediction.VPDataPreprator
 
 import scala.collection.mutable.ListBuffer
@@ -56,40 +57,15 @@ object mainClass {
 
 
 
-    val filesConsidered:ListBuffer[String]=ListBuffer("GW_New.txt")//WeeFull.txt
-    /**Original data to Clustered Data*/
-    val dirCheckinsNC="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Checkins" // checkin directory non-clustered
-    val dirCheckinsC="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Checkins"
-    val dirMapGridIdToLocIds="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Mappings/GridToLocId"
-    val dirNCVenues="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Venues"
-    val dirClusteredVenues="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Venues"
-    val fileName=""
-    val gridX=10
-    val gridY=10
-    val filesCheckins=new java.io.File(dirCheckinsNC).listFiles
+    /**
+      * cluster dataset*/
+    var te=new TaskExecuter
+    //te.clusterDatasets()
 
-
-    filesCheckins.foreach{t=>
-      if(filesConsidered.contains(t.getName)) {
-        val gc = new GridCluster
-        val fileName = t.getName
-        println("File Name--------------::" + t.getName)
-        gc.getClusters(dirCheckinsNC + "/" + fileName, gridX, gridY, dirCheckinsC + "/" + fileName, dirMapGridIdToLocIds + "/" + fileName) //(dirCheckinsNC+"\\"+fileName,gridX,gridY,dirCheckinsC+"\\"+fileName)
-        gc.getClusterdVenues(dirMapGridIdToLocIds + "/" + fileName,dirNCVenues+"/"+fileName,dirClusteredVenues+"/"+fileName)
-
-        //convoyPattern.getConvoyTable(weeConvoys,weeFriendsFile,weeVenues,weeConvoyTableFile)
-      }
-    }
-
-
-
-    /** tau values */
-      val friendsFSOld="/q/storage/aamir/Dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/FS_Old_WOSemantics.txt"
-    val checkinsFSOld="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Checkins/FS_Old_WOSemantics.txt"
-    val tau="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/tau/FS_Old_WOSemantics.txt"
-    val dtf=new DeltaTimeFinder
-    //dtf.computeDeltaUsersUpdated(friendsFSOld,checkinsFSOld,8.0,tau)
-
+    /**
+      * find cdf tau
+      * */
+    te.findCDFTau()
 
 
     //test

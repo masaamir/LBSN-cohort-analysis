@@ -200,6 +200,7 @@ class DeltaTimeFinder {
 
   def computeDeltaUsersUpdated(friendsFile:String,checkinsFile: String,
                                timeT:Double, fileWrite:String): Unit ={
+    val fileName=checkinsFile.split("/").last
 
     val fr= new fileReaderLBSN
     val friends=fr.readFriendsFile(friendsFile)
@@ -216,7 +217,7 @@ class DeltaTimeFinder {
 
     val timeThreshold:Double=timeT// in hours
     val conversionTime=1000 *60*60 // in hours
-    val fileWriter=new PrintWriter(new File(fileWrite+"_TimeWindow_"+timeThreshold+".txt"))
+    val fileWriter=new PrintWriter(new File(fileWrite+fileName+"_TimeWindow_"+timeThreshold+".txt"))
     val l2LMap: scala.collection.mutable.Map[(Long, Long), ArrayBuffer[Long]] = scala.collection.mutable.Map()
 
     val vistorsByLocs:Map[Long,List[Long]]=checkins.groupBy(t=> t._6).map(t=> (t._1,t._2.map(it=> it._1).distinct))//.toMap
@@ -239,7 +240,8 @@ class DeltaTimeFinder {
     val totalSize=locsByUsers.size
     for(i<-0 until locsByUsers.size){ //{user,{checkins}}
       val user:Long=locsByUsers(i)._1
-      //println("current,total::"+i,totalSize)
+      if(i%10000==0)
+      println("current,total::"+i,totalSize)
       //println("for user ::"+locsByUsers(i)._1)
       val usersCheckin=locsByUsers(i)._2
       for(j<-0 until usersCheckin.size-1){ //for check-ins of each users
