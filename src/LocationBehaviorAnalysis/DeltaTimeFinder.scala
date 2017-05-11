@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 import java.util.Date
 
 import FormatData.fileReaderLBSN
+import TaskRunner.InfluentialUsersFinder
 
 import scala.collection.mutable.{HashSet, ListBuffer}
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -14,7 +15,8 @@ import scala.reflect.io
  */
 class DeltaTimeFinder {
 
-  val iuf= new InfluentialUsersFinder // class for finding follower friends
+  val iuf= new InfluentialUsersFinder
+  // class for finding follower friends
 
   def findDistance(lat1:Double,lon1:Double,lat2:Double,lon2:Double): Double ={
     val earthRadius = 6371000; //meters
@@ -219,7 +221,6 @@ class DeltaTimeFinder {
     val conversionTime=1000 *60*60 // in hours
     val fileWriter=new PrintWriter(new File(fileWrite+fileName+"_TimeWindow_"+timeThreshold+".txt"))
     val l2LMap: scala.collection.mutable.Map[(Long, Long), ArrayBuffer[Long]] = scala.collection.mutable.Map()
-
     val vistorsByLocs:Map[Long,List[Long]]=checkins.groupBy(t=> t._6).map(t=> (t._1,t._2.map(it=> it._1).distinct))//.toMap
     //println("locations ")
     //vistorsByLocs.toList.sortBy(t=> -t._2.size).take(10).foreach(println)
@@ -228,11 +229,7 @@ class DeltaTimeFinder {
     //println("users")
     //friendsByUsers.toList.sortBy(t=> -t._2.size).take(10).foreach(println)
     //friendsByUsers.toList.take(2).map(t=> t._1).foreach(println)
-
     //accumulateFriends(List(14221,2163),friendsByUsers)
-
-
-
 
     val locsByUsers=checkins.groupBy(t=> t._1).map(t=> (t._1,t._2.sortBy(it=> it._2))).toList
     fileWriter.println("Location1"+"\t"+"Location2"+"\t"+"Abs"+"\t"+"Relt"+"\t"+"AbsFriend"+"\t"+"ReltFriends"+"\t"

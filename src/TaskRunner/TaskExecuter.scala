@@ -42,7 +42,7 @@ class TaskExecuter {
     val cdfTau="/q/storage/aamir/Dataset/LBSN/Old/collective/cdfTau/"
 
     val filesCheckins=new java.io.File(dirCheckinsC).listFiles
-    val filesConsidered=ListBuffer("FourSquare.txt")//WeeFull.txt//"Gowalla.txt","BrightKite.txt",
+    val filesConsidered=ListBuffer("BrightKite.txt","FourSquare.txt","Gowalla.txt")//WeeFull.txt//"Gowalla.txt","BrightKite.txt",
 
 
     filesCheckins.foreach{f=>
