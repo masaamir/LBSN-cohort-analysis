@@ -33,6 +33,7 @@ class fileReaderLBSN {
     val checkins = scala.io.Source.fromFile(checkinFile).getLines()
         .map(t => t.split("\t"))
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong))
+        .filter(t=> t._6!=0) // for avoid GW data set anomalies
         .toList.distinct
     return checkins //{(user,Date,lat,lon,locStr,LocLong,dateStringActual)}
   }
@@ -43,6 +44,7 @@ class fileReaderLBSN {
     val checkins = scala.io.Source.fromFile(checkinFile).getLines().toList
         .map(t => t.split("\t")).filter(t=> t(1).contains("T") &&t(1).contains("Z"))
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(1)))
+          .filter(t=> t._6!=0) // for avoid GW data set anomalies
         .toList.distinct
     return checkins //{(user,Date,lat,lon,locStr,LocLong,dateStringActual)}
   }
@@ -53,6 +55,7 @@ class fileReaderLBSN {
     val checkins = scala.io.Source.fromFile(checkinWithCatsFile).getLines()//.take(100)
         .map(t => t.split("\t"))
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(6)))
+        .filter(t=> t._6!=0) // for avoid GW data set anomalies
         .toList.distinct
     return checkins //{(user,Date,lat,lon,locStr,LocLong, Categories)}
   }
