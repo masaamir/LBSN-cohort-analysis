@@ -16,7 +16,7 @@ class DataFormatter {
   // convert string to date:
   def stringToDate(dateString: String): Date = {
     val updateDate = dateString.replaceAll("T", "").replaceAll("Z", "")
-    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddhh:mm:ss")
+    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss")
     val date: Date = formatter.parse(updateDate)
     return date
   }

@@ -41,8 +41,8 @@ class fileReaderLBSN {
   def readCheckinFile(checkinFile: String): List[(Long, Date, Double, Double, String, Long, String)] = {
     // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
     val df = new DataFormatter // data formatter object
-    val checkins = scala.io.Source.fromFile(checkinFile).getLines().toList
-        .map(t => t.split("\t")).filter(t=> t(1).contains("T") &&t(1).contains("Z"))
+    val checkins = scala.io.Source.fromFile(checkinFile).getLines()//.take(2000)
+        .map(t => t.split("\t")).filter(t=> (t(1).contains("T")&&t(1).contains("Z")))
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(1)))
           .filter(t=> t._6!=0) // for avoid GW data set anomalies
         .toList.distinct
@@ -52,7 +52,7 @@ class fileReaderLBSN {
   def readCheckinsWithCats(checkinWithCatsFile:String): List[(Long, Date, Double, Double, String, Long, String)] ={
     // receive file(tab separated): userId time lat long LocId(String) LocId(ConvertibleToLong)
     val df = new DataFormatter // data formatter object
-    val checkins = scala.io.Source.fromFile(checkinWithCatsFile).getLines()//.take(100)
+    val checkins = scala.io.Source.fromFile(checkinWithCatsFile).getLines()//.take(2000)
         .map(t => t.split("\t"))
         .map(t => (t(0).toLong, df.stringToDate(t(1)), t(2).toDouble, t(3).toDouble, t(4), t(5).toLong, t(6)))
         .filter(t=> t._6!=0) // for avoid GW data set anomalies

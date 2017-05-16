@@ -27,7 +27,7 @@ class FilterData {
 
   def stringToDate(dateString: String): Date = {
     val updateDate = dateString.replaceAll("T", "").replaceAll("Z", "")
-    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-mm-ddhh:mm:ss")
+    val formatter: SimpleDateFormat = new SimpleDateFormat("yyyy-mm-ddHH:mm:ss")
     val date: Date = formatter.parse(updateDate)
     return date
   }

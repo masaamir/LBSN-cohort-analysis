@@ -3,6 +3,10 @@ package LocationBehaviorAnalysis
 import java.io.{File, PrintWriter}
 import java.util.Date
 
+import FormatData.fileReaderLBSN
+import TaskRunner.InfluentialUsersFinder
+
+import scala.collection.mutable.{HashSet, ListBuffer}
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.reflect.io
 
@@ -10,6 +14,10 @@ import scala.reflect.io
  * Created by MAamir on 5/2/2016.
  */
 class DeltaTimeFinder {
+
+  val iuf= new InfluentialUsersFinder
+  // class for finding follower friends
+
   def findDistance(lat1:Double,lon1:Double,lat2:Double,lon2:Double): Double ={
     val earthRadius = 6371000; //meters
     val dLat = Math.toRadians(lat2-lat1);
@@ -159,47 +167,77 @@ class DeltaTimeFinder {
 
   }
 
+
+  def accumulateFollowerFriends(users:List[Long]): ArrayBuffer[Long] ={
+    var accUsers:ArrayBuffer[Long]=new ArrayBuffer[Long]()
+    accUsers ++= users
+    //println("initial users ::"+accUsers)
+
+    accUsers ++= iuf.findPotentialBV(users.to[HashSet],0.01).to[ArrayBuffer]
+
+    return accUsers.distinct
+  }
+
+  var usersWOFriends:Set[Long]=Set()
+
   def accumulateFriends(users:List[Long],usersByFriends:Map[Long,List[Long]]): ArrayBuffer[Long] ={
     var accUsers:ArrayBuffer[Long]=new ArrayBuffer[Long]()
     accUsers ++= users
     //println("initial users ::"+accUsers)
     users.foreach{u=>
       //println("user ::"+u)
-      val friends=usersByFriends.getOrElse(u,null)
-      //println("friends "+friends)
-      if(friends!=null){
+      var friends:List[Long]=List()
+      if(usersByFriends.contains(u)) {
+        friends = usersByFriends.getOrElse(u, List())
         accUsers ++= friends
       }
-      else println("Error !!")
+      else {
+        usersWOFriends += u
+        println("No friends exist for user::"+u)
+      }
     }
     //println("final users::"+accUsers)
     return accUsers.distinct
   }
 
-  def computeDeltaUsersUpdated(friends:List[(Long,Long)],checkins: List[(Long, Date, Double, Double, String, Long, String)],timeT:Double, fileWrite:String): Unit ={
+  def computeDeltaUsersUpdated(friendsFile:String,checkinsFile: String,
+                               timeT:Double, fileWrite:String): Unit ={
+    val fileName=checkinsFile.split("/").last
+
+    val fr= new fileReaderLBSN
+    val friends=fr.readFriendsFile(friendsFile)
+    val checkins= fr.readCheckinFile(checkinsFile)
+    var usersFriends:Set[Long]=Set()
+    friends.foreach{f=>
+      usersFriends += f._1
+      usersFriends += f._2
+    }
+    val userCheckins:Set[Long]=checkins.map(t=> t._1).toSet
+    println("users from friends size::"+usersFriends.size, " users,Checkins::"+userCheckins.size)
+    println("checkins - friends ::"+(userCheckins.diff(usersFriends).size))
+    println("friends - checkins ::"+(usersFriends.diff(userCheckins).size))
+
     val timeThreshold:Double=timeT// in hours
     val conversionTime=1000 *60*60 // in hours
-    val fileWriter=new PrintWriter(new File(fileWrite+"_TimeWindow_"+timeThreshold+".txt"))
+    val fileWriter=new PrintWriter(new File(fileWrite+fileName+"_TimeWindow_"+timeThreshold+".txt"))
     val l2LMap: scala.collection.mutable.Map[(Long, Long), ArrayBuffer[Long]] = scala.collection.mutable.Map()
-
-    val vistorsByLocs=checkins.groupBy(t=> t._6).map(t=> (t._1,t._2.map(it=> it._1).distinct))
+    val vistorsByLocs:Map[Long,List[Long]]=checkins.groupBy(t=> t._6).map(t=> (t._1,t._2.map(it=> it._1).distinct))//.toMap
     //println("locations ")
     //vistorsByLocs.toList.sortBy(t=> -t._2.size).take(10).foreach(println)
     val friendsByUsers=friends.groupBy(t=> t._1).map(t=> (t._1,t._2.map(it=> it._2)))
+    println("friends map size ::"+friendsByUsers.size)
     //println("users")
     //friendsByUsers.toList.sortBy(t=> -t._2.size).take(10).foreach(println)
     //friendsByUsers.toList.take(2).map(t=> t._1).foreach(println)
-
     //accumulateFriends(List(14221,2163),friendsByUsers)
 
-
-
-
     val locsByUsers=checkins.groupBy(t=> t._1).map(t=> (t._1,t._2.sortBy(it=> it._2))).toList
-    fileWriter.println("Location1"+"\t"+"Location2"+"\t"+"Abs"+"\t"+"Relt"+"\t"+"AbsFriend"+"\t"+"ReltFriends")
+    fileWriter.println("Location1"+"\t"+"Location2"+"\t"+"Abs"+"\t"+"Relt"+"\t"+"AbsFriend"+"\t"+"ReltFriends"+"\t"
+      +"AbsPFriends"+"\t"+"RelPFriends")
     val totalSize=locsByUsers.size
-    for(i<-0 until locsByUsers.size){
+    for(i<-0 until locsByUsers.size){ //{user,{checkins}}
       val user:Long=locsByUsers(i)._1
+      if(i%10000==0)
       println("current,total::"+i,totalSize)
       //println("for user ::"+locsByUsers(i)._1)
       val usersCheckin=locsByUsers(i)._2
@@ -211,7 +249,7 @@ class DeltaTimeFinder {
           if(second._6!=first._6){ // if locations are not equal
           val temp:ArrayBuffer[Long]=l2LMap.getOrElse((second._6,first._6),null)
             //val distance = findDistance(second._3, second._4, first._3, first._4)
-            if(temp!=null) { //if entry already exists
+            if(l2LMap.contains((second._6,first._6))){//if(temp!=null) { //if entry already exists
             val gotList=temp += user
               l2LMap += ((second._6, first._6) ->gotList)
             }
@@ -220,34 +258,47 @@ class DeltaTimeFinder {
             }
           }//else ignore
         }//else ignore
-      }
+      }// for one user
     }//all users done
     println("processing output")
     //val cc=0
 
+
+    val timeWindow=8 // in hours
+    iuf.runner(friendsFile,checkinsFile,timeWindow)
     val result=l2LMap.toList.map(t=> (t._1,t._2.distinct)).filter(t=> t._2.size>1) //ignore one common visitors
         .map{t=> // l1,l2,#user
         val abs=t._2.size
-        val totalVisitors=vistorsByLocs.getOrElse(t._1._2,null)
+      var totalVisitors:List[Long]=List()
+      if(vistorsByLocs.contains(t._1._2)){
+        totalVisitors=vistorsByLocs.getOrElse(t._1._2,List())
+      }
         var relt:Double=0.0
-        if(totalVisitors!=null) {
+        if(totalVisitors.size>0) {
           relt=abs.toDouble/totalVisitors.size
         } else{
           println("Error !!")
+          println(" for location ::"+t._1._2)
         }
         val absF=accumulateFriends(t._2.toList,friendsByUsers).size
         val totalVisitorsFriends=accumulateFriends(vistorsByLocs.getOrElse(t._1._2,null),friendsByUsers)
         val reltF=absF.toDouble/totalVisitorsFriends.size.toDouble
 
+      /**potential visitors*/
+
+      val absPF=accumulateFollowerFriends(t._2.toList).size
+      val totalVisitorsPotentialFriends=accumulateFollowerFriends(vistorsByLocs.getOrElse(t._1._2,List()))
+      val reltPF=absPF.toDouble/totalVisitorsPotentialFriends.size.toDouble
+
        /*if(abs==null || relt==null ||absF==null || reltF==null){
          println("error")
        }else println(t._1,t._2,abs,relt,absF,reltF)*/
-        (t._1._1,t._1._2,abs,relt,absF,reltF)
+        (t._1._1,t._1._2,abs,relt,absF,reltF,absPF,reltPF)
       }
-
+    println("users without friends size::"+usersWOFriends.size)
     result.foreach{t=>
       if(t._3>1){
-        fileWriter.println(t._1+"\t"+t._2+"\t"+t._3+"\t"+t._4+"\t"+t._5+"\t"+t._6)//l1,l2,abs,relt,absF,reltF
+        fileWriter.println(t._1+"\t"+t._2+"\t"+t._3+"\t"+t._4+"\t"+t._5+"\t"+t._6+"\t"+t._7+"\t"+t._8)//l1,l2,abs,relt,absF,reltF
       }
     }
 
