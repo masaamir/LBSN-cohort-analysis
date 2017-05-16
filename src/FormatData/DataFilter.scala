@@ -1,5 +1,6 @@
 package FormatData
 
+import java.io.{PrintWriter,File}
 import java.util.Date
 
 /**
@@ -24,6 +25,21 @@ class DataFilter {
     }
 
     println("Checkins with categories::"+filteredCheckins.size)
+
+  }
+
+  def filterFriendsOnCheckins(cFriendsFile:String,cChekcinsFile:String,fileWrite:String): Unit ={
+    val fr=new fileReaderLBSN
+    val friends=fr.readFriendsFile(cFriendsFile)
+    println("current connections are::"+friends.size)
+    val usersInChecks=fr.readCheckinFile(cChekcinsFile).filter(t=>  t._6!=0).map(t=> (t._1,1)).distinct.toMap
+    val newFriends=friends.filter(f=> usersInChecks.contains(f._1) && usersInChecks.contains(f._2))
+    println("new connectsion area ::"+newFriends.size)
+    val writer=new PrintWriter(new File(fileWrite))
+    newFriends.foreach{c=>
+      writer.println(c._1+"\t"+c._2)
+    }
+    writer.close()
 
   }
 

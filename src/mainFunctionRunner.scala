@@ -28,6 +28,7 @@ class mainFunctionRunner {
   val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/ConvoysWithCat/Wee.txt"
 */
 
+  /*
   /**FourSquare*/
   val FSFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/FS.txt"
 
@@ -43,6 +44,25 @@ class mainFunctionRunner {
   val pairUserPairSeqActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/FS.txt_first_0.5"
   /**Test data*/
   val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/FS.txt_second_0.5"
+*/
+
+  /**Gowalla*/
+  val GWFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/GW_New.txt_first_0.5"
+
+  /***/
+  val inputCategoriesFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/InputCats/GW_New.txt"
+  /**Training Data Files*/
+  val convoysTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/GW_New.txt_first_0.5"
+  val catCheckins="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/GW_New.txt_first_0.5"
+  var convoysCatTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/GW_New.txt_first_0.5"
+
+  val userActivitiesTSWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/GW_New.txt_first_0.5"
+  val groupActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/GW_New.txt_first_0.5"
+  val pairUserPairSeqActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/GW_New.txt_first_0.5"
+  /**Test data*/
+  val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/GW_New.txt_second_0.5"
+
+
 
   def findMatchingCats(cats:ListBuffer[String],filePath:String)
   :ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[String],(Long,Long))] ={
@@ -138,11 +158,10 @@ class mainFunctionRunner {
 
     //while(alpha<=1){
     //alpha += 0.1
-    surplusAlpha = -0.1
-    while (surplusAlpha <= 1) {
+    surplusAlpha = 0l//-0.1
+    while (surplusAlpha <= 0.2) {
       surplusAlpha += 0.1
       println("surplusAlpha is ::" + surplusAlpha)
-
       /** initialize variables */
       //var predictedGroup:(ListBuffer[Long], Double)=null
       var predictedGroupList: ListBuffer[(ListBuffer[Long], Double)] = new ListBuffer[(ListBuffer[Long], Double)]()
@@ -154,12 +173,12 @@ class mainFunctionRunner {
       var totalAvailableGroups=0
       catsList=catsList.map(t=> t.map(it=> it.trim))
 
-      //catsList = catsList.take(1)
+      catsList = catsList.take(2)
       catsList.foreach { cats =>
         println("categories are::" + cats)
         starTime=System.currentTimeMillis()
         /** Predict group on inputs */
-        predictedGroupList = tgf.runnerTravelGroup(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, FSFriends,
+        predictedGroupList = tgf.runnerTravelGroup(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, GWFriends,
           cats.toList, lambda, alpha, mu, eta, surplusAlpha, globalAff, localAff, globalCoh, catCoh, globalSeqCoh, catSeqCoh, k)
         endTime=System.currentTimeMillis()
         println("Time for this query in mSec::"+(endTime-starTime))
@@ -297,7 +316,7 @@ class mainFunctionRunner {
     val cats=List("Religious","Nightlife")
 
     val gfg=new GroupFinderGreedy
-    gfg.runner(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, FSFriends,
+    gfg.runner(userActivitiesTSWithCat, groupActsWithCatFile, pairUserPairSeqActsWithCatFile, GWFriends,
       cats, lambda, alpha, mu,eta, surplusAlpha, globalAff, localAff, globalCoh, catCoh,globalSeqCoh,catSeqCoh,k)
 
   }

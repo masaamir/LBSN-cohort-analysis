@@ -87,20 +87,20 @@ val dirMapGridIdToLocIds="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered
 
       /** add categories with check-ins */
       val df = new DataFormatter
-      df.getCheckinsWithCategories(dirCheckins+ds,dirVenues+"GW_New.txt",dirCheckinsWithCat+ds)
+        //df.getCheckinsWithCategories(dirCheckins+ds,dirVenues+"GW_New.txt",dirCheckinsWithCat+ds)
 
       /** create data-set based on time stamped */
       val con=new ConvoyAnalysis_Test
-      con.findGroupActivities(dirCheckins+ds,60,dirGroupActsTS+ds)// 1 hour
-      con.findUserActivitiesTS(dirCheckins+ds,60,dirUserActsTS+ds)
+      //con.findGroupActivities(dirCheckins+ds,60,dirGroupActsTS+ds)// 1 hour
+      //con.findUserActivitiesTS(dirCheckins+ds,60,dirUserActsTS+ds)
 
       /** associate categories with time stamped based data-sets*/
-      df.associateCatWithGroupActs(dirGroupActsTS+ds,dirCheckinsWithCat+ds,dirGroupActsTSWithCat+ds)
-      df.associateCatWithUserActsTS(dirUserActsTS+ds,dirCheckinsWithCat+ds,dirUserActsTSWithCat+ds)
+      //df.associateCatWithGroupActs(dirGroupActsTS+ds,dirCheckinsWithCat+ds,dirGroupActsTSWithCat+ds)
+      //df.associateCatWithUserActsTS(dirUserActsTS+ds,dirCheckinsWithCat+ds,dirUserActsTSWithCat+ds)
 
       /**associate conovoys with categories*/
       val csf=new ConvoyStatsFinder
-      df.getConvoysWithCats(dirConvoys+ds,dirVenues+"GW_New.txt",dirConvoysWithCats+ds)
+      //df.getConvoysWithCats(dirConvoys+ds,dirVenues+"GW_New.txt",dirConvoysWithCats+ds)
 
       /** sequential pair data*/
       //df.getPairUserWSeqActsConvoys(dirConvoys+ds,dirPairSeqActs+ds)

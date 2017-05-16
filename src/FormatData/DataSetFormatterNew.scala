@@ -64,6 +64,8 @@ class DataSetFormatterNew {
     return result
   }
 
+
+
   def formatGWVenues(venue1File:String,venue2File:String,chksFile:String,writeVenuesFile:String): Unit ={
     val writer=new PrintWriter(new File(writeVenuesFile))
     val venue1 = scala.io.Source.fromFile(venue1File).getLines().drop(1).toList//.take(10)
@@ -111,8 +113,17 @@ class DataSetFormatterNew {
 
   }
 
+  def formatDataSetGW(): Unit ={
+
+  }
+
 
   def formatGWDataSet(venue1File: String, venue2File: String, friendsFile: String, checkinFile: String, friendWrite: String, checkInWrite: String): Unit = {
+
+    // read checkins
+
+
+    /*
     val fWriter = new PrintWriter(new File(friendWrite))
     val chkWriter = new PrintWriter(new File(checkInWrite))
 
@@ -126,8 +137,11 @@ class DataSetFormatterNew {
 
     var notFoundCount = 0
 
+
     val chkLines = scala.io.Source.fromFile(checkinFile).getLines().drop(1) //.take(100000)//.take(10).foreach(t=> println(t))
     println("checkins Size::" + chkLines.size)
+
+    */
     /*.map(t=> t.split(","))
     .map{t=>
     val coords=venues.getOrElse(t(1).trim.toLong,null)
