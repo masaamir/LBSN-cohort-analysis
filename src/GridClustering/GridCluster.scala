@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 import collection.mutable.HashMap
 
 /**
- * Created by MAamir on 9/29/2016.
+ * Created by XXX on 9/29/2016.
  */
 class GridCluster {
 

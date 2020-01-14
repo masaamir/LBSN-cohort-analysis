@@ -7,60 +7,60 @@ import scala.collection.mutable
 import scala.collection.mutable.{ListBuffer, PriorityQueue}
 
 /**
-  * Created by aamir on 20/01/17.
+  * Created by XXX on 20/01/17.
   */
 class mainFunctionRunner {
 /*
   /**Wee places*/
-  val weeFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/Wee.txt"
+  val weeFriends="/home/XXX/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/Wee.txt"
 
   /***/
-  val inputCategoriesFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/categoriesTestData.txt"
+  val inputCategoriesFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/categoriesTestData.txt"
   /**Training Data Files*/
-  val convoysTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/Convoys/Wee.txt"
-  val catCheckins="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/CheckinsWithCats/Wee.txt"
-  var convoysCatTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/Convoys/convoysWithCats/Wee.txt"
+  val convoysTrainingFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/Convoys/Wee.txt"
+  val catCheckins="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/CheckinsWithCats/Wee.txt"
+  var convoysCatTrainingFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/Convoys/convoysWithCats/Wee.txt"
 
-  val userActivitiesTSWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/UserActivitiesTS_1Hour/Wee_cat.txt"
-  val groupActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/GroupActivitiesWithCats/Wee.txt"
-  val pairUserPairSeqActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/GroupActivities/PairGroupParSequentialActsWithCats/Wee.txt"
+  val userActivitiesTSWithCat="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/UserActivitiesTS_1Hour/Wee_cat.txt"
+  val groupActsWithCatFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/GroupActivitiesWithCats/Wee.txt"
+  val pairUserPairSeqActsWithCatFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/trainingData/GroupActivities/PairGroupParSequentialActsWithCats/Wee.txt"
   /**Test data*/
-  val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/ConvoysWithCat/Wee.txt"
+  val convoysCatTestFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/ConvoysWithCat/Wee.txt"
 */
 
   /*
   /**FourSquare*/
-  val FSFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/FS.txt"
+  val FSFriends="/home/XXX/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/FS.txt"
 
   /***/
-  val inputCategoriesFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/InputCats/FS.txt"
+  val inputCategoriesFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/InputCats/FS.txt"
   /**Training Data Files*/
-  val convoysTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/FS.txt_first_0.5"
-  val catCheckins="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/FS.txt_first_0.5"
-  var convoysCatTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/FS.txt_first_0.5"
+  val convoysTrainingFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/FS.txt_first_0.5"
+  val catCheckins="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/FS.txt_first_0.5"
+  var convoysCatTrainingFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/FS.txt_first_0.5"
 
-  val userActivitiesTSWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/FS.txt_first_0.5"
-  val groupActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/FS.txt_first_0.5"
-  val pairUserPairSeqActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/FS.txt_first_0.5"
+  val userActivitiesTSWithCat="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/FS.txt_first_0.5"
+  val groupActsWithCatFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/FS.txt_first_0.5"
+  val pairUserPairSeqActsWithCatFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/FS.txt_first_0.5"
   /**Test data*/
-  val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/FS.txt_second_0.5"
+  val convoysCatTestFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/FS.txt_second_0.5"
 */
 
   /**Gowalla*/
-  val GWFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/GW_New.txt_first_0.5"
+  val GWFriends="/home/XXX/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/GW_New.txt_first_0.5"
 
   /***/
-  val inputCategoriesFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/InputCats/GW_New.txt"
+  val inputCategoriesFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/InputCats/GW_New.txt"
   /**Training Data Files*/
-  val convoysTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/GW_New.txt_first_0.5"
-  val catCheckins="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/GW_New.txt_first_0.5"
-  var convoysCatTrainingFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/GW_New.txt_first_0.5"
+  val convoysTrainingFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/GW_New.txt_first_0.5"
+  val catCheckins="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/GW_New.txt_first_0.5"
+  var convoysCatTrainingFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/GW_New.txt_first_0.5"
 
-  val userActivitiesTSWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/GW_New.txt_first_0.5"
-  val groupActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/GW_New.txt_first_0.5"
-  val pairUserPairSeqActsWithCatFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/GW_New.txt_first_0.5"
+  val userActivitiesTSWithCat="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/GW_New.txt_first_0.5"
+  val groupActsWithCatFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/GW_New.txt_first_0.5"
+  val pairUserPairSeqActsWithCatFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/GW_New.txt_first_0.5"
   /**Test data*/
-  val convoysCatTestFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/GW_New.txt_second_0.5"
+  val convoysCatTestFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/GW_New.txt_second_0.5"
 
 
 

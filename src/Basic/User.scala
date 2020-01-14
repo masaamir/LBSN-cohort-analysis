@@ -1,7 +1,7 @@
 package Basic
 
 /**
- * Created by MAamir on 9/26/2016.
+ * Created by XXX on 9/26/2016.
  */
 class User(id:Long,name:String,address:String) {
   val uid:Long=id

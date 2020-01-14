@@ -8,35 +8,35 @@ import MaximalCliquesBase.TravelGroupFinder
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by aamir on 01/02/17.
+  * Created by XXX on 01/02/17.
   */
 class DataPreparator {
 
   /**non Clustered*/
-  val dirCheckinsNC="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Checkins/"
-  val dirVenuesNC="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Venues/"
+  val dirCheckinsNC="/home/XXX/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Checkins/"
+  val dirVenuesNC="/home/XXX/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Venues/"
 
   /**original formatted data*/
-  val dirCheckins="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Checkins/" //original checkins but formatted in required format
-  val dirFriends="/home/aamir/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/"
-  val dirVenues="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Venues/" //location ids coordinates and categories
-val dirMapGridIdToLocIds="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Mappings/GridToLocId/"
+  val dirCheckins="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Checkins/" //original checkins but formatted in required format
+  val dirFriends="/home/XXX/Study/dataset/LBSN/withSemantics/NonClustered/DataSet/Friends/"
+  val dirVenues="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Venues/" //location ids coordinates and categories
+val dirMapGridIdToLocIds="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Mappings/GridToLocId/"
 
   /** Time stamped */
-  val dirUserActsTS="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTS/"// activities based on time stamp (these are different than original dataset based on snapshot of dataset taken after the given time)
-  val dirGroupActsTS="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTS/"
-  val dirPairSeqActs="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActs/"
-  val dirConvoys="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/" //convoys created from clustered data with only loc ids
+  val dirUserActsTS="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTS/"// activities based on time stamp (these are different than original dataset based on snapshot of dataset taken after the given time)
+  val dirGroupActsTS="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTS/"
+  val dirPairSeqActs="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActs/"
+  val dirConvoys="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/Convoys/" //convoys created from clustered data with only loc ids
 
   /**with categories (semantics)*/
-  val dirCheckinsWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/"
-  val dirUserActsTSWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/"
-  val dirGroupActsTSWithCat="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/"
-  val dirPairSeqActsWithCats="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/"
-  val dirConvoysWithCats="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/"
+  val dirCheckinsWithCat="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/"
+  val dirUserActsTSWithCat="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/UserActsTSWithCat/"
+  val dirGroupActsTSWithCat="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/GroupActsTSWithCat/"
+  val dirPairSeqActsWithCats="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/PairSeqActsWithCat/"
+  val dirConvoysWithCats="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/DataSet/ConvoysWithCat/"
 
   /**input Cats*/
-  val inputCategoriesFile="/home/aamir/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/categoriesTestData.txt"
+  val inputCategoriesFile="/home/XXX/Study/dataset/LBSN/withSemantics/Clustered/GroupFinder/CrossValidation/testData/categoriesTestData.txt"
 
 
 

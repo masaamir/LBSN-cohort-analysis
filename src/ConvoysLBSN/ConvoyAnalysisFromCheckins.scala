@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 
 /**
- * Created by MAamir on 30-03-2016.
+ * Created by XXX on 30-03-2016.
  */
 class ConvoyAnalysisFromCheckins {
   def stringToDate(dateString: String): Date = {

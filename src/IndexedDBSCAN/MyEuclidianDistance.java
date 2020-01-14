@@ -1,7 +1,7 @@
 package IndexedDBSCAN;
 
 /**
- * Created by MAamir on 4/22/2016.
+ * Created by XXX on 4/22/2016.
  */
 
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;

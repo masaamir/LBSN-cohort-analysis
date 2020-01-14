@@ -1,7 +1,7 @@
 package Basic
 
 /**
- * Created by MAamir on 9/26/2016.
+ * Created by XXX on 9/26/2016.
  */
 import scala.collection.mutable.ListBuffer
 class Location (id:Long,lat:Double,lon:Double,area:String,state:String,country:String,categories:ListBuffer[String]) {

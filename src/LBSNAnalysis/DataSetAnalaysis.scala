@@ -6,7 +6,7 @@ import java.util.Date
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 11-04-2016.
+ * Created by XXX on 11-04-2016.
  */
 class DataSetAnalaysis {
   def stringToDate(dateString: String): Date = {

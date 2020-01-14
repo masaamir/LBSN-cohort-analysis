@@ -1,7 +1,7 @@
 package LBSNAnalysis;
 
 /**
- * Created by MAamir on 04-04-2016.
+ * Created by XXX on 04-04-2016.
  */
 /* ==========================================
  * JGraphT : a free Java graph-theory library

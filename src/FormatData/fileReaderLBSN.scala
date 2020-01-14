@@ -9,7 +9,7 @@ import Basic._
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 4/25/2016.
+ * Created by XXX on 4/25/2016.
  */
 class fileReaderLBSN {
   def dateToString(inDate:Date): String ={// standard which is read

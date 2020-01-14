@@ -5,7 +5,7 @@ import java.io.{File, PrintWriter}
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by aamir on 21/12/16.
+  * Created by XXX on 21/12/16.
   */
 class ActivityGraphMaker {
 

@@ -1,7 +1,7 @@
 package LBSNAnalysis;
 
 /**
- * Created by MAamir on 4/18/2016.
+ * Created by XXX on 4/18/2016.
  */
 
 import net.sf.javaml.core.Instance;
