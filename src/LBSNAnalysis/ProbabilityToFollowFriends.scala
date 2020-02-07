@@ -7,7 +7,7 @@ import java.util.Date
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by XXX on 17-03-2016.
+ * Created by XXX on 17-XXX-XXX.
  */
 /** Find the probability of a user that he/check-ins at a location if at least "filterSize" number of his/her
   * friends have checked-in at the location before.

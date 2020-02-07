@@ -1,7 +1,7 @@
 package CoordinateConversion;
 
 /**
- * Created by MAamir on 9/29/2016.
+ * Created by MXXX on 9/29/XXX.
  */
 class UTMCoordConverter
 {

@@ -1,7 +1,7 @@
 package Basic
 
 /**
- * Created by XXX on 9/26/2016.
+ * Created by XXX on XXX.
  */
 class User(id:Long,name:String,address:String) {
   val uid:Long=id
@@ -10,7 +10,6 @@ class User(id:Long,name:String,address:String) {
 
   def this(id:Long){
     this(id,"","")
-    //println("only id is given")
   }
 
   def getUId(): Long ={

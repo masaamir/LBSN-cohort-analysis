@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 /**
- * Created by MAamir on 23-03-2016.
+ * Created by MXXX on 23-XXX-XXX.
  */
 class FilterData {
   def countLocations(checkinFilePath: String): Unit = {

@@ -4,7 +4,7 @@ import java.io.{File, PrintWriter}
 import java.util.Date
 
 /**
- * Created by MAamir on 5/2/2016.
+ * Created by MXXX on 5/2/XXX.
  */
 class correlationFinder {
   def computeCorrelationFriends(friends: List[(Long, Long)], checkins: List[(Long, Date, Double, Double, String, Long, String)]): Unit ={

@@ -7,7 +7,7 @@ import java.util.Date
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 15-03-2016.
+ * Created by MXXX on 15-XXX-XXX.
  */
 /** Find out the probability of users that if he/check-ins at a particular places at least #friendSize
   * number of his/her friends will check-in at that place within time window of #windowSize

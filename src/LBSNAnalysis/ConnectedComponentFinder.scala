@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 
 /**
- * Created by MAamir on 07-04-2016.
+ * Created by MXXX on 07-04-XXX.
  */
 class ConnectedComponentFinder {
 

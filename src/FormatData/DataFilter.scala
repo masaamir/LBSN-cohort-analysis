@@ -4,7 +4,7 @@ import java.io.{PrintWriter,File}
 import java.util.Date
 
 /**
- * Created by XXX on 4/26/2016.
+ * Created by XXX on 4/26/XXX.
  */
 class DataFilter {
   def filterGWOnCategorySpots(fileCheckin:String,fileSpots:String): Unit ={

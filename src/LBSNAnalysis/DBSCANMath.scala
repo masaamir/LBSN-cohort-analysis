@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 
 
 /**
- * Created by XXX on 4/21/2016.
+ * Created by XXX on 4/21/XXX.
  */
 class DBSCANMath {
   def getClusters(checkinFile: String, writeFile: String): Unit = {

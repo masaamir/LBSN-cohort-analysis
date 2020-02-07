@@ -8,7 +8,7 @@ import MaximalCliquesBase.TravelGroupFinder
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by XXX on 01/02/17.
+  * Created by XXX on 01/02/XXX.
   */
 class DataPreparator {
 

@@ -8,7 +8,7 @@ import FormatData.{DataFormatter, fileReaderLBSN}
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by XXX on 4/25/2016.
+ * Created by XXX on 4/25/XXX.
  */
 class StatFinder {
 

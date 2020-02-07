@@ -3,7 +3,7 @@ package LBSNAnalysis
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by XXX on 08-04-2016.
+ * Created by XXX on 08-04-XXX.
  */
 class AnalysisValuesComputer {
   def parseFile(CCConvoysfilePath: String, CCValuesFilePath: String): List[(Array[Long], Array[Long], Array[Long], Array[String])] = {

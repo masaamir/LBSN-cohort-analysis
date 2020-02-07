@@ -3,7 +3,7 @@ package ConvoysLBSN
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by aamir on 10/10/16.
+  * Created by XXX on 10/10XXX.
   */
 class ConvoyVisitor (inVId:Long,inConvoyCount:Long,inCompanions:ListBuffer[ConvoyCompanion],
                      inOnLocations:ListBuffer[Long],inOnCategories:ListBuffer[String],inUserConvoys:ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[String])]) {

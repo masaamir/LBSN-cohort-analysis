@@ -5,7 +5,7 @@ import java.io.{File, PrintWriter}
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 5/5/2016.
+ * Created by MXXX on 5/5/XXX.
  */
 class syntheticDataGenerator {
   def createSyntheticData(checkinsFile: String, times: Int, checkinFileWrite: String): Unit = {

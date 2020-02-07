@@ -14,7 +14,7 @@ import Basic._
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 9/23/2016.
+ * Created by MXXX on 9/23/XXX.
  */
 class ConvoysPatternAnalysis {
 

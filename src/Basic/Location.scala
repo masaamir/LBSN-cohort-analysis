@@ -1,7 +1,7 @@
 package Basic
 
 /**
- * Created by XXX on 9/26/2016.
+ * Created by XXX on XXX.
  */
 import scala.collection.mutable.ListBuffer
 class Location (id:Long,lat:Double,lon:Double,area:String,state:String,country:String,categories:ListBuffer[String]) {
@@ -15,13 +15,7 @@ class Location (id:Long,lat:Double,lon:Double,area:String,state:String,country:S
 
   def this(id:Long,lat:Double,lon:Double){
     this(id,lat,lon,"","","",null)
-    //println("only id lat and long")
   }
-  /*def this(id:Long,lat:Double,lon:Double,area:String,state:String,country:String,categories:ListBuffer[String]){
-    this(id,lat,lon,area,state,country,categories)
-  }*/
-
-
 
   def printInfo(): Unit ={
     println("id:"+lId+" lat:"+lLat+" lon:"+lLon+" Area:"+lArea+" state:"+lState+" country:"+lCountry+" Categories:"+lCategories.mkString(","))

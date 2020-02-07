@@ -11,7 +11,7 @@ import scala.reflect.io
 import scala.util.control.Breaks
 
 /**
- * Created by MAamir on 4/26/2016.
+ * Created by MXXX on 4/26/XXX.
  */
 /** Find the probability of a user that he/check-ins at a location if at least "filterSize" number of his/her
   * friends have checked-in at the location before.

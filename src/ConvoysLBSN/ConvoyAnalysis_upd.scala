@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 
 /**
- * Created by MAamir on 30-03-2016.
+ * Created by XXX on 30-XXX-XXX.
  */
 class ConvoyAnalysis_upd {
   def stringToDate(dateString: String): Date = {
@@ -19,7 +19,6 @@ class ConvoyAnalysis_upd {
   }
   def removeConsecutiveLocs(inconvoys: ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])]):
   ListBuffer[(ListBuffer[Long], ListBuffer[Long], ListBuffer[(Double, Double)])] ={
-    //println("new one ::")
     val distConsLocs=inconvoys.map{t=>
       val actLocs:ListBuffer[Long]=t._2
       val actTS=t._3
@@ -27,29 +26,24 @@ class ConvoyAnalysis_upd {
       var newTS:ListBuffer[(Double,Double)]=new ListBuffer()
       var tempTS:(Double,Double)=null
       var tempLoc:Long=0L
-      //println("before is ::"+actLocs)
       if(actLocs.size==1){
         newLocs=actLocs
         newTS=actTS
       }
       for(i<-1 until actLocs.size){
-        //println("count::"+i)
         val preLoc=actLocs(i-1)
         val currLoc=actLocs(i)
         val preTS=actTS(i-1)
         val currTS=actTS(i)
         if(tempLoc==0L){
-         // println("new tem")
           tempLoc=preLoc
           tempTS=preTS
         }
-        //println("previous,current, tempLoc"+preLoc,currLoc,tempLoc)
         if(tempLoc==currLoc){
           tempTS=(tempTS._1,currTS._2)
         }else if (tempLoc !=currLoc ){
           newLocs+=tempLoc
           newTS+=tempTS
-          //println("inserted"+tempLoc)
           tempLoc=0L
           tempTS=null
         }
@@ -58,13 +52,8 @@ class ConvoyAnalysis_upd {
           newLocs+=tempLoc
           newTS+=tempTS
           }
-          //println("inserted"+tempLoc)
-          //tempLoc=0L
-          //tempTS=null
         }
       }
-      //println("before::"+actLocs)
-      //println("after::"+newLocs)
       if(newLocs.contains(0))println("ERROR !!!!")
       (t._1,newLocs,newTS)
 
@@ -99,43 +88,15 @@ class ConvoyAnalysis_upd {
     var TimeStampGroups:ListBuffer[(ListBuffer[Long],ListBuffer[Long],ListBuffer[(Double,Double)])]=new ListBuffer()
     for (i <- start until end) {
       // group time stamped check-ins on the basis of visited location
-      //println("i is ::"+i)
 
       if(i%100==0)
       println("count, total ::"+i,end)
       TimeStampGroups = TSMap(i)._2.groupBy(t => t._2).map(t => (t._2.map(it => it._1).to[ListBuffer],
         ListBuffer(t._1), ListBuffer(TSMap(i)._1))).to[ListBuffer]
       TimeStampGroups=TimeStampGroups.filter(t => t._1.size >= minConvoySize && !t._2.contains(0L))
-      //println("timeStamp group sizes initial::"+TimeStampGroups)
-      /*if(TimeStampGroups.size>1) {
-        println(i)
-        //println("time stamped for" + i, TSMap(i))
-        //println("group::"+TimeStampGroups)
-      }*/
-
-
-
-      //{users},loc,{startTime,endTime}
-      //if(TimeStampGroups.size>1)
-      //println("timeStamp group sizes after filtration::"+TimeStampGroups.size)
       addConvoys= new ListBuffer() // all convoys
       delConvoys= new ListBuffer() // all convoys
       currentConvoys = currentConvoys.filter(t => t._1.size >= minConvoySize) // filter current convoys
-      //TimeStampGroups.filter(t=> t._2.size>1).foreach(t=> println("group"+t))
-      //println("current convoys::"+currentConvoys)
-      //println("group ::"+TimeStampGroups)
-
-
-
-      /*writeFile.println("count::"+i)
-      writeFile.println("convoys::"+convoys.map(t=> (t._1,t._2,t._3.map(it=> (formatter.format(it._1),formatter.format(it._2))))))
-      writeFile.println("current Convoys::"+currentConvoys.map(t=> (t._1,t._2,t._3.map(it=> (formatter.format(it._1),formatter.format(it._2))))))
-      writeFile.println("TimeStamp::"+TimeStampGroups.map(t=> (t._1,t._2,t._3.map(it=> (formatter.format(it._1),formatter.format(it._2))))))
-      */
-      //writeFile.println("after removing consecutive locs")
-      //currentConvoys=removeConsecutiveLocs(currentConvoys)
-      //convoys=removeConsecutiveLocs(convoys)
-
 
       writeFile.println("count::"+i)
       writeFile.println("convoys::"+convoys.map(t=> (t._1,t._2,t._3.map(it=> (formatter.format(it._1),formatter.format(it._2))))))
@@ -144,8 +105,6 @@ class ConvoyAnalysis_upd {
 
 
       currentConvoys.foreach { cc =>
-        //println("inside group")
-        //keepCC=false
         writeFile.println("current convoy::"+cc)
         delConvoys += cc
         TimeStampGroups.foreach { g =>

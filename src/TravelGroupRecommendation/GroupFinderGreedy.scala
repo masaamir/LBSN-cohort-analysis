@@ -5,7 +5,7 @@ import FormatData.fileReaderLBSN
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by aamir on 23/12/16.
+  * Created by XXX on 23/12XXX.
   */
 class GroupFinderGreedy {
 
@@ -188,25 +188,6 @@ class GroupFinderGreedy {
         if(inGlobalAff){
           categoryScore += globalScore
         }
-        //categoryScore += personalizedScore +globalScore
-        /*
-                /** personalized preference of user u towards category cat */
-                //val userActs=userActMap
-
-                val userActCat=userCatActMap.getOrElse((u,cat),0).
-
-                val userActCat=userCatActMap.getOrElse((u,cat),null)
-
-                globalScore = (1 - lambada) * userCatCheckins.size.toDouble / CKGroupByUser.getOrElse(u, ListBuffer()).size.toDouble
-
-                /** Global contribution of user u towards category cat */
-                val userActs = CKGroupByCat.getOrElse(cat, null) // all check-ins at the given category
-                val userCatCheckins = catCheckins.filter(t => t._1 == u) // check-ins of the user at the given category
-                personalizedScore = lambada * (userCatCheckins.size.toDouble / catCheckins.size.toDouble)
-
-                /** score of user u for category */
-                categoryScore += 1.toDouble / inputCat.size.toDouble * (personalizedScore + globalScore)
-                */
       }
       if(inCats.size!=0)
         categoryScore = categoryScore/inCats.size.toDouble

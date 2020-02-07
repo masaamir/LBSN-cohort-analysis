@@ -1,7 +1,7 @@
 package GridClustering
 
 /**
- * Created by XXX on 24-12-2015.
+ * Created by XXX on 24-12-XXX.
  */
 class Point (xInput:Double,yInput:Double) {
 

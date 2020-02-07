@@ -6,7 +6,7 @@ import TravelGroupRecommendation.{GroupFinderGreedy, GroupFinderGreedyOld}
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by maaamir on 12/19/16.
+  * Created by XXX on XXX.
   */
 class TravelGroupFinder {
 

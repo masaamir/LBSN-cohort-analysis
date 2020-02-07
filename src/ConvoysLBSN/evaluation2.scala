@@ -5,7 +5,7 @@ import FormatData.fileReaderLBSN
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by aamir on 01/11/16.
+  * Created by XXX on 01/11XXX.
   */
 class evaluation2 {
 

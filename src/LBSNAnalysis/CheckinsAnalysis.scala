@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 /**
- * Created by MAamir on 21-03-2016.
+ * Created by MXXX on 21-XXX-XXX.
  */
 class CheckinsAnalysis {
   def stringToDate(dateString: String): Date = {

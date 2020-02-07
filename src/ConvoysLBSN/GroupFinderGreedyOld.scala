@@ -7,7 +7,7 @@ import FormatData.fileReaderLBSN
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by XXX on 23/12/16.
+  * Created by XXX on 23/12XXX.
   */
 class GroupFinderGreedyOld {
 

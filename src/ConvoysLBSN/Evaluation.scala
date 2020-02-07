@@ -9,7 +9,7 @@ import FormatData.fileReaderLBSN
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Created by aamir on 13/10/16.
+  * Created by XXX on 13/10XXX.
   */
 class Evaluation {
   var friends: Map[List[Long], List[Long]] = Map()

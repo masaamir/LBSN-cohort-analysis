@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 
 
 /**
- * Created by MAamir on 30-03-2016.
+ * Created by XXX on 30-XXX-XXX.
  */
 class ConvoyAnalysis {
   def stringToDate(dateString: String): Date = {
@@ -31,32 +31,26 @@ class ConvoyAnalysis {
       val newTS:ListBuffer[(Double,Double)]=new ListBuffer()
       var tempTS:(Double,Double)=null
       var tempLoc:Long=0L
-      //println("before is ::"+actLocs)
       for(i<-1 until actLocs.size){
-        //println("count::"+i)
         val preLoc=actLocs(i-1)
         val currLoc=actLocs(i)
         val preTS=actTS(i-1)
         val currTS=actTS(i)
         if(tempLoc==0L){
-          //println("new tem")
           tempLoc=preLoc
           tempTS=preTS
         }
-        //println("previous,current, tempLoc"+preLoc,currLoc,tempLoc)
         if(tempLoc==currLoc){
           tempTS=(tempTS._1,currTS._2)
         }else if (tempLoc !=currLoc ){
           newLocs+=tempLoc
           newTS+=tempTS
-          //println("inserted"+tempLoc)
           tempLoc=0L
           tempTS=null
         }
         if(i==actLocs.size-1){
           newLocs+=tempLoc
           newTS+=tempTS
-          //println("inserted"+tempLoc)
           tempLoc=0L
           tempTS=null
         }
@@ -75,7 +69,6 @@ class ConvoyAnalysis {
 
 
         val writeFile=new PrintWriter(new File(writeFilePath))
-     //val writerValuesFile=new PrintWriter(new File(writeFileValues))
     val minConvoySize = 3 // min. no. of users a convoy should have
     val minConvoyLocSize = 2 //min. no. of locs a convoy should have visited
     val minConvoyDistinctLocSize = 2
@@ -87,16 +80,10 @@ class ConvoyAnalysis {
     val start = 1
     val end = TSMap.size
     for (i <- start until end) {
-      //find convoys
-      //println("time stamp, total::" + i, end)
-      //TSMap(i).
       // group time stamped check-ins on the basis of visited location
       val TimeStampGroups = TSMap(i - 1)._2.groupBy(t => t._2).map(t => (t._2.map(it => it._1).to[ListBuffer],
         ListBuffer(t._1), ListBuffer(TSMap(i - 1)._1))).to[ListBuffer].filter(t => t._1.size >= minConvoySize)
-      //{users},loc,{startTime,endTime}
-      //TimeStampGroups.filter(t=> t._2.size>1).foreach(t=> println("group"+t))
       TimeStampGroups.foreach { g => // only keep the maximal convoys in current convoy
-        //println("group::" + g)
         var containCheck = false
         currentConvoys.foreach { cc =>
           if (g._1.forall(cc._1.contains)) {
@@ -117,9 +104,7 @@ class ConvoyAnalysis {
           (u, loc)
           }
         val newLocGroup = usersLoc.groupBy(t => t._2)
-        //newLocGroup.foreach(t=> println("location group::"+t))
         val filteredLocGroup = newLocGroup.filter(t => t._2.size >= minConvoySize && t._1 != 0L) // filter groups that have at least min users and the location is not NULL.
-        //filteredLocGroup.foreach(t=> println("location group::"+t))
         if (c._2.size >= minConvoyLocSize && newLocGroup.size >= 1) {//update to 1 from minConvoyDistinctLocSize
           // check if size of convoy have been to multiple locations and broke at this point
           convoys += c
@@ -176,8 +161,6 @@ class ConvoyAnalysis {
     filteredConvoys.foreach(t=> println(t._1,t._2,t._3.map(it=> (formatter.format(it._1),formatter.format(it._2)))))
 
 
-
-    //distConsLocs.foreach(t=> println(t._1,t._2,t._3.map(it=> (formatter.format(it._1),formatter.format(it._2)))))
     println("filtered convoys size::"+filteredConvoys.size)
     writeFile.println("#Users,#UniqueLocations,#Locations,#Times")
     // convoys with of only users, without considering friends
@@ -189,28 +172,6 @@ class ConvoyAnalysis {
 
 
     /** */
-    /*val convoysWithCliques=getConvoyWithCliques(filteredConvoys,friendsFile)
-    convoysWithCliques.foreach{c=>
-      writeFile.println(c._1,c._2.distinct,c._2,c._3)
-    }*/
-    /*
-    val cc=new ConnectedComponentFinder()
-    val convoysWithCC=cc.getConvoyWithConnectedComponents(filteredConvoys,friendsFile,minConvoySize)
-    convoysWithCC.foreach{c=>
-      //writeFile.println(c._1,c._2.distinct,c._2,c._3)
-      writeFile.println(c._1.mkString(",")+"\t"+compress(c._2.toList).mkString(",")+"\t"+c._2.mkString(",")+"\t"+c._3.mkString(","))
-      //writeFile.println(c._1.mkString(",")+"\t"+c._2.distinct.mkString(",")+"\t"+c._2.mkString(",")+"\t"+c._3.mkString(","))
-      writerValuesFile.println(c._1.size+"\t"+compress(c._2.toList).size+"\t"+c._2.size+"\t"+c._3.size)
-      //(1,2,3)
-      //t=> t._6
-      /*writeFile.println{
-        c._1.foreach(t=> writeFile.print(t+","))+"\t"+c._2.distinct.
-          foreach(t=> writeFile.print(t+","))+"\t"+c._2.foreach(t=> writeFile.print(t+","))+"\t"+c._3.foreach(t=> writeFile.print(t+","))
-      }*/
-    }
-    writeFile.close()
-    writerValuesFile.close()
-    */
 
   }
 
@@ -237,34 +198,24 @@ class ConvoyAnalysis {
     //time unit to convert the visited time from millisecond to given unit
     val timeUnit = convertMSecTo //(1000 * 60 *60 ) // in hours now //*24
     val sortedByTime = ckLines.sortBy(t => t._2) //sort check-ins on the basis of time
-    //println("minimum time::" + sortedByTime.head._8)
-    //println("maximum time::" + sortedByTime.last._8)
     val minT = sortedByTime.head._2.getTime.toDouble // earliest check-in time
     val maxT = sortedByTime.last._2.getTime.toDouble //last check-in time
-    //println("time is::"+deltaTS)
     val tsCount = Math.ceil((maxT - minT + 1) / (deltaTS)).toInt //total number of timeStamps
-    //println("Total time stamps::" + tsCount)
-    //println("Time conversion:: " + sdf.format(sortedByTime.head._2.getTime))
-    //println("Time conversion:: " + sdf.format(sortedByTime.last._2.getTime))
 
     val timeStampsMap: Array[((Double, Double), scala.collection.mutable.HashMap[Long, Long])]
     = new Array[((Double, Double), scala.collection.mutable.HashMap[Long, Long])](tsCount)
-    // startTime,endTime, List[(user,location)]
     var startTime = minT
     var endTime = 0.0
     for (i <- 0 until timeStampsMap.size) {
       //find time ranges for each timeStamp
       endTime = startTime + deltaTS
       timeStampsMap(i) = ((startTime, endTime), scala.collection.mutable.HashMap())
-      //println("start Time::"+sdf.format(startTime))
-      //println("end Time::"+sdf.format(endTime))
       startTime = endTime
     }
 
     // get all visited locations for each user
     val usersLocs = ckLines.groupBy(t => t._1)
       .map(t => (t._1, t._2.map(it => (it._6, it._2.getTime)).sortBy(iit => iit._2))) // u-> {(l,t),..}
-    //usersLocs.toList.foreach(t=> println(t._1,t._2))
     val totatlUsers = usersLocs.size //total number of users
     println("total number of users::" + totatlUsers)
     var usersCount = 0
@@ -289,7 +240,6 @@ class ConvoyAnalysis {
           current = t._2(i)
           next = t._2(i + 1)
           ind1 = Math.floor(((current._2 - (minT - 1)) / deltaTS)).toInt // timestamp of current check-in
-          //println("current time, start, end::"+sdf.format(current._2),sdf.format(timeStampsMap(ind1)._1._1),sdf.format(timeStampsMap(ind1)._1._2))
 
 
           ind2 = Math.floor(((next._2 - (minT - 1)) / deltaTS)).toInt // time stamp of next check-in
@@ -313,12 +263,6 @@ class ConvoyAnalysis {
         }
       }
     }
-    //.filter(t=> t._2.toList.size>0)
-    //timeStampsMap.
-    /*timeStampsMap.sortBy(t => -t._1._1).foreach { t =>
-      //if(t._2._1)
-      println(sdf.format(t._1._1),sdf.format(t._1._2),t._2.getOrElse(0,0L))
-    }*/
     return timeStampsMap // =startTime,EndTime, Hash(user, locs)
   }
 }

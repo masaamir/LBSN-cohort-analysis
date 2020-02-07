@@ -7,13 +7,13 @@ import scala.collection.mutable.ListBuffer
 import FormatData.fileReaderLBSN
 
 /**
-  * Created by aamir on 03/02/17.
+  * Created by XXX on XXX.
   */
 class VPDataPreprator {
 
-  val dirCheckinsCOld="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/Checkins/"
-  val dirCheckinsCats="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/DataSet/CheckinsWithCats/"
-  val dirVPData="/q/storage/aamir/Dataset/LBSN/withSemantics/Clustered/VisitorPredictor/"
+  val dirCheckinsCOld="XXX"
+  val dirCheckinsCats="XXX"
+  val dirVPData="XXX"
 
   def filterCheckinsOnLocsOld(checkinsFile:String, minVisits:Int)
   : List[(Long, Date, Double, Double, String, Long, String)] ={

@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 import FormatData.fileReaderLBSN
 
 /**
-  * Created by aamir on 05/01/17.
+  * Created by XXX on XXX.
   */
 class ConvoyStatsFinder {
 

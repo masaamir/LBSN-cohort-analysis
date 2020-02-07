@@ -11,7 +11,7 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.reflect.io
 
 /**
- * Created by MAamir on 5/2/2016.
+ * Created by MXXX on 5/2/XXX.
  */
 class DeltaTimeFinder {
 

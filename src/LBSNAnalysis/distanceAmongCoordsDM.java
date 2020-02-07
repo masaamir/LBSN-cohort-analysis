@@ -4,7 +4,7 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 
 /**
- * Created by XXX on 4/21/2016.
+ * Created by XXX on 4/21/XXX.
  */
 public class distanceAmongCoordsDM implements DistanceMeasure {
     public double compute(double[] first, double[] second)

@@ -11,7 +11,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 //import scala.util.parsing.combinator.Parsers.{Failure, Success}
 /**
-  * Created by aamir on 14/02/17.
+  * Created by XXX on XXX.
   */
 class ConvoyFinderParallel {
 

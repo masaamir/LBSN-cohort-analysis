@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 30-03-2016.
+ * Created by MXXX on 30-XXX-XXX.
  */
 class ConveyAnalysis_org {
   def stringToDate(dateString: String): Date = {

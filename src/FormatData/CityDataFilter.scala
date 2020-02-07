@@ -1,7 +1,7 @@
 package FormatData
 
 /**
- * Created by MAamir on 5/10/2016.
+ * Created by MXXX on 5/10/XXX.
  */
 class CityDataFilter {
 

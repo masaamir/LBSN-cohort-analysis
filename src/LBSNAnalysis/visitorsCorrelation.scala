@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 /**
- * Created by XXX on 22-03-2016.
+ * Created by XXX on 22-XXX-XXX.
  */
 class visitorsCorrelation {
   def stringToDate(dateString: String): Date = {

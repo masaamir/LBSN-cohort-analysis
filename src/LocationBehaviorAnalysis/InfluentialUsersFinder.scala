@@ -8,7 +8,7 @@ import FormatData.fileReaderLBSN
 
 
 /**
-  * Created by maaamir on 1/2/17.
+  * Created by maXXX on 1/2/XXX.
   */
 class InfluentialUsersFinder {
 

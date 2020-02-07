@@ -9,7 +9,7 @@ import net.sf.javaml.distance.EuclideanDistance
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by XXX on 4/12/2016.
+ * Created by XXX on 4/12/XXX.
  */
 class DataSetFormatter {
   def formatFSDataSet(venuesFile: String, friendsFile: String, checkinFile: String, friendWrite: String, checkInWrite: String): Unit = {

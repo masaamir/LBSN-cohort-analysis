@@ -10,7 +10,7 @@ import CoordinateConversion.{Angle, UTMCoord}
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 4/25/2016.
+ * Created by MXXX on 4/25/XXX.
  */
 class DataFormatter {
   // convert string to date:

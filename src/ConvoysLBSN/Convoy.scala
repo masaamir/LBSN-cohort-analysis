@@ -1,14 +1,13 @@
 package ConvoysLBSN
 
 /**
- * Created by XXX on 9/19/2016.
+ * Created by XXX on 9/19/XXX.
  */
 import scala.collection.mutable.ListBuffer
 import scala.reflect.internal.util.Collections
 
 class Convoy  {
 
-  //private List<Integer> objs = new ArrayList<Integer>();
   var startTime:Long= -1L
   var endTime:Long= -1L
   var extended:Boolean=false
@@ -94,50 +93,13 @@ class Convoy  {
   def getStartTime():Long= {
     return startTime;
   }
-  /*def createConvoyOld(inList:(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long],Long,Long)): Convoy={ //inList:{Users},{locs},{TimeStamps},timeStampId
-    val convoy:Convoy = new Convoy()
-    inList._1.foreach{u=> //add users
-      convoy.addUsers(u)
-    }
-    //println("get users::"+convoy.getUsers())
-    inList._2.foreach{l=> // add locations
-      convoy.addLocations(l)
-    }
-    inList._3.foreach{t=> // add timeStamps
-      convoy.addTimeStamp(t)
-    }
-    convoy.startTime=inList._4
-    convoy.endTime=inList._5
-    //convoy.setTime(inList._3)
-    //convoy.users=convoy.users.sortBy(t=> t)
-     // convoy.getUsers().sortBy(t=> t)
-    return convoy
-  }*/
-  def createConvoy(inList:(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long],Long,Long)): Convoy={ //inList:{Users},{locs},{TimeStamps},timeStampId
-    //val convoy:Convoy = new Convoy()
-    /*inList._1.foreach{u=> //add users
-      convoy.addUsers(u)
-    }*/
-    //convoy.
+
+  def createConvoy(inList:(ListBuffer[Long],ListBuffer[Long],ListBuffer[Long],Long,Long)): Convoy={
     users ++=inList._1
-    //println("get users::"+convoy.getUsers())
-    /*inList._2.foreach{l=> // add locations
-      convoy.addLocations(l)
-    }*/
-    //convoy.
     locations ++=inList._2
-    /*inList._3.foreach{t=> // add timeStamps
-      convoy.addTimeStamp(t)
-    }*/
-    //convoy.
     timeStamps ++=inList._3
-    //convoy.
     startTime=inList._4
-    //convoy.
     endTime=inList._5
-    //convoy.setTime(inList._3)
-    //convoy.users=convoy.users.sortBy(t=> t)
-    // convoy.getUsers().sortBy(t=> t)
     return this
   }
 

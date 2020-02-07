@@ -7,7 +7,7 @@ import LBSNAnalysis.FilterData
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by MAamir on 4/27/2016.
+ * Created by MXXX on 4/27/XXX.
  */
 /** Find out the probability of users that if he/check-ins at a particular places at least #friendSize
   * number of his/her friends will check-in at that place within time window of #windowSize
